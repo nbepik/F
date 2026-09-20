@@ -398,10 +398,10 @@ firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{
 // Each code can be used once. If you replace a code in this file,
 // that slot becomes available again with the new code.
 const ACCESS_CODES=[
- "252612","17261","2717","0112",
- "4713","19371","10987","000012","00023",
- "0017317","0283","0183","038136","0272736",
- "0273","75500","0270","122236","162018"
+ "0000","0000","0000","0000","0000",
+ "0000","0000","0000","0000","0000",
+ "0000","0000","0000","0000","0000",
+ "0000","0000","0000","0000","0000"
 ];
 
 const ADMIN_CODE="3ed43ef3";
@@ -426,6 +426,18 @@ if(!firebaseUid){
 }
 
 const $=id=>document.getElementById(id);
+
+function openStudioApp(){
+ $("auth").style.display="none";
+ $("app").style.display="block";
+ try{
+  updateFontList();
+  loadGlyph();
+  render();
+ }catch(err){
+  console.error("Studio init error:",err);
+ }
+}
 
 const chars=[
  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -470,13 +482,13 @@ async function authenticateAccess(){
   firebaseUid=firebase.auth().currentUser.uid;
   localStorage.setItem(SESSION_KEY,firebaseUid);
  }catch(err){
-  showAuthError("Firebase connection error.");
+  showAuthError("Firebase login failed. Check that Anonymous Authentication is enabled.");
   return;
  }
 
  if(value===ADMIN_CODE){
   try{
-   const claim=await db.ref("admin/claimed").transaction(v=>{
+   const claim=await db.ref("admin/claimed_v2").transaction(v=>{
     if(v===true)return;
     return true;
    });
@@ -1482,6 +1494,15 @@ window.addEventListener("resize",()=>{
  render();
 });
 
+
+/* AUTH UI */
+$("loginBtn").onclick=authenticateAccess;
+$("pass").addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+  e.preventDefault();
+  authenticateAccess();
+ }
+});
 
 /* START */
 
