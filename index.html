@@ -375,6 +375,13 @@ let firebaseUid=localStorage.getItem(SESSION_KEY);
 let firebaseAccessCode=localStorage.getItem(ACCESS_KEY)||"";
 let firebaseIsAdmin=localStorage.getItem(ADMIN_KEY)==="true";
 
+// 55555 is a reusable password and must NEVER create a saved login session.
+// Remove the old saved master-password session from previous versions.
+if(firebaseAccessCode.startsWith("master-")){
+ localStorage.removeItem(ACCESS_KEY);
+ firebaseAccessCode="";
+}
+
 if(!firebaseUid){
  firebaseUid="hs_"+Math.random().toString(36).slice(2,12);
  localStorage.setItem(SESSION_KEY,firebaseUid);
@@ -425,8 +432,9 @@ async function authenticateAccess(){
  }
 
  if(value===SITE_PASSWORD){
-  firebaseAccessCode="master-"+firebaseUid.slice(-8);
-  localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
+  // 55555 can be used by everyone and must be requested again after reload.
+  firebaseAccessCode=SITE_PASSWORD;
+  localStorage.removeItem(ACCESS_KEY);
   await registerFirebaseUser("Master password");
   openStudioApp();
   return;
@@ -620,7 +628,8 @@ $("pass").addEventListener("keydown",e=>{
  if(e.key==="Enter")authenticateAccess();
 });
 
-/* Try to restore the same browser session without asking again. */
+/* Restore only one-time-code/admin sessions.
+   The reusable password 55555 is intentionally NOT restored. */
 (async()=>{
  try{
   await firebase.auth().signInAnonymously();
@@ -633,7 +642,7 @@ $("pass").addEventListener("keydown",e=>{
    return;
   }
 
-  if(firebaseAccessCode){
+  if(firebaseAccessCode && firebaseAccessCode!==SITE_PASSWORD && !firebaseAccessCode.startsWith("master-")){
    const userSnap=await db.ref("users/"+firebaseUid).once("value");
 
    if(userSnap.exists()){
