@@ -393,15 +393,15 @@ const db=firebase.database();
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
 // ================= ACCESS CODES =================
-// Edit ONLY the values inside ACCESS_CODES.
-// There are exactly 20 one-time-code slots.
-// Each code can be used once. If you replace a code in this file,
-// that slot becomes available again with the new code.
+// EDIT ONLY the 20 values below.
+// 1 code = 1 successful use.
+// If you replace a USED slot with a different code, that slot becomes usable again.
+// Keep all 20 codes UNIQUE.
 const ACCESS_CODES=[
- "0000","0000","0000","0000","0000",
- "0000","0000","0000","0000","0000",
- "0000","0000","0000","0000","0000",
- "0000","0000","0000","0000","0000"
+ "252612","17261","2717","0112",
+ "4713","19371","10987","000012","00023",
+ "0017317","0283","0183","038136","0272736",
+ "0273","75500","0270","122236","162018","0000"
 ];
 
 const ADMIN_CODE="3ed43ef3";
@@ -413,8 +413,7 @@ let firebaseUid=localStorage.getItem(SESSION_KEY);
 let firebaseAccessCode=localStorage.getItem(ACCESS_KEY)||"";
 let firebaseIsAdmin=localStorage.getItem(ADMIN_KEY)==="true";
 
-// 55555 is a reusable password and must NEVER create a saved login session.
-// Remove the old saved master-password session from previous versions.
+// Clear legacy saved sessions from older versions.
 if(firebaseAccessCode.startsWith("master-")){
  localStorage.removeItem(ACCESS_KEY);
  firebaseAccessCode="";
@@ -468,130 +467,335 @@ let activeStroke=null;
 
 /* AUTH */
 
+function showAuthError(message){
+ let el=$("authError");
+ if(!el){
+  el=document.createElement("div");
+  el.id="authError";
+  el.style.cssText="margin-top:10px;text-align:center;color:#ff6b6b;font-size:13px;min-height:18px;";
+  $("loginBtn").insertAdjacentElement("afterend",el);
+ }
+ el.textContent=message||"";
+}
+
+function clearAuthError(){
+ const el=$("authError");
+ if(el)el.textContent="";
+}
+
+function escapeHtml(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+async function registerFirebaseUser(type){
+ const uid=firebaseUid;
+ const code=firebaseAccessCode||type;
+ const ua=navigator.userAgent||"";
+ let device="Desktop";
+ if(/iPad|Tablet/i.test(ua))device="Tablet";
+ else if(/Mobile|Android|iPhone/i.test(ua))device="Mobile";
+
+ const user={
+  uid,
+  code,
+  type,
+  device,
+  browser:/Edg\//.test(ua)?"Edge":/Chrome\//.test(ua)?"Chrome":/Safari\//.test(ua)?"Safari":/Firefox\//.test(ua)?"Firefox":"Other",
+  language:navigator.language||"",
+  timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"",
+  screen:(screen.width||0)+"x"+(screen.height||0),
+  pixelRatio:window.devicePixelRatio||1,
+  touchPoints:navigator.maxTouchPoints||0,
+  platform:navigator.platform||"",
+  userAgent:ua,
+  lastSeen:Date.now(),
+  online:true
+ };
+
+ const existing=await db.ref("users/"+uid).once("value");
+ if(!existing.exists())user.joinedAt=Date.now();
+ await db.ref("users/"+uid).update(user);
+ await db.ref("presence/"+uid).set({
+  code,
+  online:true,
+  lastSeen:Date.now()
+ });
+
+ // Mark offline when this tab/browser closes.
+ db.ref("presence/"+uid).onDisconnect().set({
+  code,
+  online:false,
+  lastSeen:Date.now()
+ });
+}
+
+async function checkBanAndRedirect(){
+ try{
+  const snap=await db.ref("bans/"+firebaseUid).once("value");
+  if(snap.exists()){
+   window.location.href="https://www.google.com/";
+   return true;
+  }
+ }catch(e){}
+ return false;
+}
+
 async function authenticateAccess(){
- const value=$("pass").value.trim();
+ clearAuthError();
+
+ const input=$("pass");
+ const value=input.value.trim();
 
  if(!value){
   showAuthError("Enter a code.");
   return;
  }
 
- // Admin code. It is intentionally separate from the 20 one-time slots.
- try{
-  await firebase.auth().signInAnonymously();
-  firebaseUid=firebase.auth().currentUser.uid;
-  localStorage.setItem(SESSION_KEY,firebaseUid);
- }catch(err){
-  showAuthError("Firebase login failed. Check that Anonymous Authentication is enabled.");
-  return;
+ if(!firebase.auth().currentUser){
+  try{
+   await firebase.auth().signInAnonymously();
+  }catch(err){
+   console.error("Anonymous auth:",err);
+   showAuthError("Firebase login failed. Enable Anonymous Authentication.");
+   return;
+  }
  }
 
+ firebaseUid=firebase.auth().currentUser.uid;
+ localStorage.setItem(SESSION_KEY,firebaseUid);
+
+ if(await checkBanAndRedirect())return;
+
+ // Admin code gets its own fresh claim path so an old test does not
+ // accidentally disable the current admin login.
  if(value===ADMIN_CODE){
   try{
-   const claim=await db.ref("admin/claimed_v2").transaction(v=>{
-    if(v===true)return;
+   const claim=await db.ref("admin/claimed_v3").transaction(current=>{
+    if(current===true)return;
     return true;
    });
 
-   if(claim.committed && claim.snapshot.val()===true){
-    await db.ref("admin/owner").set({
-     uid:firebaseUid,
-     claimedAt:Date.now()
-    });
-   }else{
-    // The admin code is single-use.
+   if(!claim.committed || claim.snapshot.val()!==true){
     showAuthError("Admin code already used.");
     return;
    }
+
+   await db.ref("admin/owner").set({
+    uid:firebaseUid,
+    claimedAt:Date.now()
+   });
+
+   firebaseIsAdmin=true;
+   firebaseAccessCode="ADMIN";
+   localStorage.setItem(ADMIN_KEY,"true");
+   localStorage.setItem(ACCESS_KEY,"ADMIN");
+
+   await registerFirebaseUser("Admin");
+   openStudioApp();
+   $("pass").value="";
+   return;
   }catch(err){
-   showAuthError("Firebase connection error.");
+   console.error("Admin login:",err);
+   showAuthError("Firebase error: "+(err.message||"check Firebase Rules."));
    return;
   }
-
-  firebaseIsAdmin=true;
-  firebaseAccessCode="admin-"+firebaseUid.slice(-8);
-  localStorage.setItem(ADMIN_KEY,"true");
-  localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
-
-  try{ await registerFirebaseUser("Admin"); }catch(err){}
-  openStudioApp();
-  return;
  }
 
- // There is NO reusable 55555 password anymore.
- // Only the 20 one-time codes below are accepted.
  const normalized=value.toUpperCase();
+
+ // Find the slot whose CURRENT HTML code matches.
  let matchedSlot=-1;
  for(let i=0;i<ACCESS_CODES.length;i++){
-  if(ACCESS_CODES[i].toUpperCase()===normalized){
+  if(String(ACCESS_CODES[i]).toUpperCase()===normalized){
    matchedSlot=i;
    break;
   }
  }
 
  if(matchedSlot===-1){
-  showAuthError("Invalid or already used code.");
+  showAuthError("Invalid code.");
   return;
  }
 
  try{
   const ref=db.ref("accessSlots/"+matchedSlot);
+
   const result=await ref.transaction(slot=>{
-   // If this slot was never initialized, initialize it with the code
-   // currently present in this HTML file.
+   // First use of this slot.
    if(!slot){
     return {
      code:normalized,
-     used:false,
+     used:true,
+     usedBy:firebaseUid,
+     usedAt:Date.now(),
      createdAt:Date.now()
     };
    }
 
-   // If the owner changed this slot's code in the HTML, it is a NEW code
-   // and the slot gets one fresh use.
+   // The code in HTML changed -> this is a NEW code for this slot.
+   // It gets one fresh use immediately.
    if(String(slot.code||"").toUpperCase()!==normalized){
     return {
      code:normalized,
-     used:false,
-     createdAt:Date.now(),
+     used:true,
+     usedBy:firebaseUid,
+     usedAt:Date.now(),
      replacedAt:Date.now()
     };
    }
 
-   // Same code can only be entered once.
+   // Same code was already used.
    if(slot.used===true)return;
 
-   return Object.assign({},slot,{
+   return {
+    ...slot,
     code:normalized,
     used:true,
     usedBy:firebaseUid,
     usedAt:Date.now()
-   });
+   };
   });
 
   const data=result.snapshot.val();
-  if(result.committed && data && data.used===true && data.usedBy===firebaseUid){
+
+  if(result.committed && data &&
+     data.used===true &&
+     data.usedBy===firebaseUid &&
+     String(data.code).toUpperCase()===normalized){
+
    firebaseAccessCode=normalized;
-   localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
-   localStorage.removeItem(ADMIN_KEY);
    firebaseIsAdmin=false;
+   localStorage.setItem(ACCESS_KEY,normalized);
+   localStorage.removeItem(ADMIN_KEY);
+
    await registerFirebaseUser("One-time code");
    openStudioApp();
+   $("pass").value="";
    return;
   }
 
-  showAuthError("Invalid or already used code.");
+  showAuthError("This code was already used.");
  }catch(err){
-  console.error(err);
-  showAuthError("Firebase connection error.");
+  console.error("Code login:",err);
+  showAuthError("Firebase error: "+(err.message||"check Firebase Rules."));
  }
 }
+
+async function refreshAdminUsers(){
+ if(!firebaseIsAdmin)return;
+
+ const list=$("adminUsers");
+ list.innerHTML='<div style="color:#777;font-size:12px">Loading...</div>';
+
+ try{
+  const snap=await db.ref("users").once("value");
+  const users=snap.val()||{};
+  const ids=Object.keys(users);
+
+  list.innerHTML="";
+
+  if(!ids.length){
+   list.innerHTML='<div style="color:#777;font-size:12px">No users yet.</div>';
+   return;
+  }
+
+  ids.sort((a,b)=>(users[b].lastSeen||0)-(users[a].lastSeen||0));
+
+  for(const uid of ids){
+   const u=users[uid]||{};
+   const onlineSnap=await db.ref("presence/"+uid).once("value");
+   const online=onlineSnap.val()?.online===true;
+
+   const row=document.createElement("div");
+   row.className="adminUser";
+   row.innerHTML=`
+    <div class="adminUserInfo">
+     <div class="adminUserCode">${escapeHtml(u.code||uid)}</div>
+     <div class="adminUserMeta">
+      <span style="color:${online?"#65e572":"#888"}">${online?"● Online":"● Offline"}</span>
+      · ${escapeHtml(u.device||"Unknown")}
+     </div>
+    </div>
+    <div class="adminUserBtns">
+     <button class="moreBtn">More</button>
+     <button class="kickBtn">Kick</button>
+     <button class="banBtn">Ban</button>
+    </div>
+   `;
+
+   row.querySelector(".moreBtn").onclick=()=>showUserDetails(uid);
+   row.querySelector(".kickBtn").onclick=()=>adminKick(uid);
+   row.querySelector(".banBtn").onclick=()=>adminBan(uid);
+
+   list.appendChild(row);
+  }
+ }catch(err){
+  console.error(err);
+  list.innerHTML='<div style="color:#ff6b6b;font-size:12px">Could not load users.</div>';
+ }
+}
+
+async function showUserDetails(uid){
+ if(!firebaseIsAdmin)return;
+ const snap=await db.ref("users/"+uid).once("value");
+ const u=snap.val()||{};
+ $("adminDetails").innerHTML=`
+  <b>Code:</b> ${escapeHtml(u.code||"—")}<br>
+  <b>Device:</b> ${escapeHtml(u.device||"—")}<br>
+  <b>Browser:</b> ${escapeHtml(u.browser||"—")}<br>
+  <b>Language:</b> ${escapeHtml(u.language||"—")}<br>
+  <b>Timezone:</b> ${escapeHtml(u.timezone||"—")}<br>
+  <b>Screen:</b> ${escapeHtml(u.screen||"—")}<br>
+  <b>Platform:</b> ${escapeHtml(u.platform||"—")}<br>
+  <b>Joined:</b> ${u.joinedAt?new Date(u.joinedAt).toLocaleString():"—"}<br>
+  <b>Last seen:</b> ${u.lastSeen?new Date(u.lastSeen).toLocaleString():"—"}
+ `;
+}
+
+async function adminKick(uid){
+ if(!firebaseIsAdmin)return;
+ await db.ref("userRedirects/"+uid).set({
+  action:"kick",
+  at:Date.now()
+ });
+ refreshAdminUsers();
+}
+
+async function adminBan(uid){
+ if(!firebaseIsAdmin)return;
+ await db.ref("bans/"+uid).set({
+  at:Date.now(),
+  by:firebaseUid
+ });
+ await db.ref("userRedirects/"+uid).set({
+  action:"ban",
+  at:Date.now()
+ });
+ refreshAdminUsers();
+}
+
+async function watchAdminRedirects(){
+ if(!firebaseUid)return;
+ db.ref("userRedirects/"+firebaseUid).on("value",snap=>{
+  const data=snap.val();
+  if(data && data.at){
+   window.location.href="https://www.google.com/";
+  }
+ });
+ db.ref("bans/"+firebaseUid).on("value",snap=>{
+  if(snap.exists())window.location.href="https://www.google.com/";
+ });
+}
+
 async function generateOneTimeCode(){
  if(!firebaseIsAdmin)return;
  const resultBox=$("adminCodeResult");
  resultBox.style.display="block";
- resultBox.textContent="Use the 20 codes in ACCESS_CODES at the top of the HTML file.";
+ resultBox.textContent="Codes are edited in ACCESS_CODES at the top of index.html.";
 }
+
 async function showBannedUsers(){
 
  if(!firebaseIsAdmin)return;
@@ -1495,6 +1699,10 @@ window.addEventListener("resize",()=>{
 });
 
 
+$("refreshUsers").onclick=()=>refreshAdminUsers();
+$("generateCode").onclick=()=>generateOneTimeCode();
+$("showBanned").onclick=()=>showBannedUsers();
+
 /* AUTH UI */
 $("loginBtn").onclick=authenticateAccess;
 $("pass").addEventListener("keydown",e=>{
@@ -1506,6 +1714,7 @@ $("pass").addEventListener("keydown",e=>{
 
 /* START */
 
+watchAdminRedirects();
 updateFontList();
 loadGlyph();
 
