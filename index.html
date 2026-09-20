@@ -2,3091 +2,805 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Handwriting Studio</title>
-
 <style>
-:root{
-    --accent:#a855f7;
-    --accent2:#c084fc;
-    --bg:#07040d;
-    --panel:#11091b;
-    --panel2:#190d27;
-    --border:rgba(168,85,247,.45);
-    --text:#ffffff;
-    --muted:#c9a6e8;
-}
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-}
-
-body{
-    overflow:hidden;
-    color:var(--text);
-    font-family:Arial,Helvetica,sans-serif;
-    background:
-        radial-gradient(circle at 50% -10%,#301050 0%,#100719 38%,#07040d 75%);
-}
-
-/* =========================================================
-   PASSWORD
-========================================================= */
-
-#auth{
-    position:fixed;
-    inset:0;
-    z-index:99999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#07040d;
-}
-
-#passwordInput{
-    width:min(340px,85vw);
-    height:54px;
-    padding:0 20px;
-    border:1px solid var(--border);
-    border-radius:14px;
-    outline:none;
-    background:#0b0710;
-    color:white;
-    font-size:17px;
-    text-align:center;
-    box-shadow:0 0 30px rgba(168,85,247,.12);
-}
-
-#passwordInput:focus{
-    border-color:var(--accent);
-    box-shadow:0 0 30px rgba(168,85,247,.28);
-}
-
-/* =========================================================
-   APP
-========================================================= */
-
-#app{
-    display:none;
-    width:100%;
-    height:100%;
-}
-
-/* =========================================================
-   TOP BAR
-========================================================= */
-
-.topbar{
-    height:68px;
-    position:relative;
-    z-index:100;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-bottom:1px solid var(--border);
-    background:rgba(9,5,14,.84);
-    backdrop-filter:blur(18px);
-}
-
-.tabs{
-    display:flex;
-    gap:5px;
-    padding:5px;
-    border:1px solid var(--border);
-    border-radius:13px;
-    background:rgba(0,0,0,.28);
-}
-
-.tab{
-    min-width:125px;
-    padding:10px 25px;
-    border:0;
-    border-radius:9px;
-    background:transparent;
-    color:var(--muted);
-    font-weight:bold;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.tab:hover{
-    color:white;
-}
-
-.tab.active{
-    color:white;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 0 20px rgba(168,85,247,.3);
-}
-
-/* =========================================================
-   SETTINGS BUTTON
-========================================================= */
-
-.settings-button{
-    position:absolute;
-    left:18px;
-    top:15px;
-    width:38px;
-    height:38px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    background:rgba(20,10,30,.85);
-    color:white;
-    font-size:18px;
-    cursor:pointer;
-}
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-.settings-panel{
-    position:fixed;
-    z-index:5000;
-    top:0;
-    left:-310px;
-    width:290px;
-    height:100%;
-    padding:24px;
-    background:rgba(12,6,20,.98);
-    border-right:1px solid var(--border);
-    box-shadow:15px 0 45px rgba(0,0,0,.45);
-    transition:left .28s ease;
-}
-
-.settings-panel.open{
-    left:0;
-}
-
-.settings-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:30px;
-}
-
-.settings-header h2{
-    font-size:21px;
-}
-
-.close-settings{
-    width:36px;
-    height:36px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:rgba(0,0,0,.3);
-    color:white;
-    font-size:22px;
-    cursor:pointer;
-}
-
-.setting label{
-    display:block;
-    margin-bottom:9px;
-    color:var(--muted);
-    font-size:13px;
-}
-
-#accentColor{
-    width:100%;
-    height:45px;
-    padding:3px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:#08050d;
-    cursor:pointer;
-}
-
-/* =========================================================
-   GENERATE
-========================================================= */
-
-#generate{
-    display:flex;
-    width:100%;
-    height:calc(100% - 68px);
-}
-
-.generate-sidebar{
-    width:285px;
-    min-width:285px;
-    height:100%;
-    padding:22px;
-    overflow-y:auto;
-    background:rgba(11,6,18,.82);
-    border-right:1px solid var(--border);
-}
-
-.generate-sidebar h2{
-    margin-bottom:20px;
-    font-size:21px;
-}
-
-.control{
-    margin-bottom:20px;
-}
-
-.control-title{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:8px;
-    color:var(--muted);
-    font-size:13px;
-}
-
-.control select,
-.control textarea{
-    width:100%;
-    border:1px solid var(--border);
-    border-radius:9px;
-    outline:none;
-    background:#08050d;
-    color:white;
-}
-
-.control select{
-    height:42px;
-    padding:0 10px;
-}
-
-.control textarea{
-    min-height:125px;
-    resize:vertical;
-    padding:11px;
-    font-family:inherit;
-}
-
-.range{
-    width:100%;
-    accent-color:var(--accent);
-}
-
-.small-buttons{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:7px;
-}
-
-.small-button{
-    padding:9px 7px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:#10091a;
-    color:white;
-    cursor:pointer;
-}
-
-.small-button:hover{
-    background:#1c0e2b;
-}
-
-.danger-button{
-    width:100%;
-    margin-top:7px;
-    padding:9px;
-    border:1px solid rgba(239,68,68,.6);
-    border-radius:8px;
-    background:transparent;
-    color:#ff8585;
-    cursor:pointer;
-}
-
-.color-picker{
-    width:100%;
-    height:40px;
-    padding:3px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    background:#08050d;
-    cursor:pointer;
-}
-
-.export-title{
-    margin-top:25px;
-    margin-bottom:9px;
-    color:var(--muted);
-    font-size:13px;
-}
-
-.export-buttons{
-    display:grid;
-    gap:8px;
-}
-
-.export-button{
-    padding:11px;
-    border:0;
-    border-radius:9px;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.export-button:hover{
-    filter:brightness(1.08);
-}
-
-/* =========================================================
-   PAPER
-========================================================= */
-
-.paper-area{
-    flex:1;
-    min-width:0;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:35px;
-    overflow:auto;
-}
-
-.paper{
-    position:relative;
-    width:min(720px,72vw);
-    height:min(850px,84vh);
-    min-width:450px;
-    min-height:560px;
-    overflow:hidden;
-    background:#fff;
-    color:#111;
-    box-shadow:0 20px 65px rgba(0,0,0,.55);
-}
-
-#generateCanvas{
-    display:block;
-    width:100%;
-    height:100%;
-}
-
-/* =========================================================
-   STUDIO
-========================================================= */
-
-#studio{
-    display:none;
-    width:100%;
-    height:calc(100% - 68px);
-    overflow:auto;
-    align-items:center;
-    justify-content:center;
-}
-
-.studio-container{
-    width:min(760px,94vw);
-    padding:25px 10px 35px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:17px;
-}
-
-.studio-top{
-    width:min(620px,90vw);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-}
-
-.font-selector{
-    flex:1;
-}
-
-.font-selector select{
-    width:100%;
-    height:42px;
-    padding:0 10px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    outline:none;
-    background:#0c0711;
-    color:white;
-}
-
-.new-font-button{
-    height:42px;
-    padding:0 16px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:var(--panel);
-    color:white;
-    cursor:pointer;
-}
-
-.current-character{
-    text-align:center;
-}
-
-.character-preview{
-    height:65px;
-    font-size:54px;
-    font-weight:bold;
-    text-shadow:0 0 20px rgba(168,85,247,.5);
-}
-
-.character-counter{
-    color:var(--muted);
-    font-size:13px;
-}
-
-.canvas-frame{
-    width:min(620px,90vw);
-    aspect-ratio:1 / 1;
-    padding:0;
-    overflow:hidden;
-    border-radius:15px;
-    background:white;
-    box-shadow:
-        0 0 0 1px rgba(168,85,247,.25),
-        0 0 45px rgba(168,85,247,.22);
-}
-
-#studioCanvas{
-    display:block;
-    width:100%;
-    height:100%;
-    touch-action:none;
-    cursor:crosshair;
-}
-
-.studio-actions{
-    width:min(620px,90vw);
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:9px;
-}
-
-.studio-actions button{
-    height:44px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    background:var(--panel);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.studio-actions button:hover{
-    background:var(--panel2);
-}
-
-.studio-actions button:disabled{
-    opacity:.3;
-    cursor:not-allowed;
-}
-
-.studio-actions .next{
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    border:0;
-}
-
-.font-name-row{
-    width:min(620px,90vw);
-    display:flex;
-    gap:9px;
-}
-
-.font-name-row input{
-    flex:1;
-    height:42px;
-    padding:0 12px;
-    border:1px solid var(--border);
-    border-radius:9px;
-    outline:none;
-    background:#0c0711;
-    color:white;
-}
-
-.font-name-row button{
-    height:42px;
-    padding:0 18px;
-    border:0;
-    border-radius:9px;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.studio-hint{
-    width:min(620px,90vw);
-    text-align:center;
-    color:rgba(255,255,255,.5);
-    font-size:12px;
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:800px){
-
-    .generate-sidebar{
-        width:235px;
-        min-width:235px;
-        padding:15px;
-    }
-
-    .paper{
-        min-width:350px;
-        min-height:500px;
-        width:68vw;
-        height:80vh;
-    }
-
-    .paper-area{
-        padding:15px;
-    }
-
-}
-
-@media(max-width:600px){
-
-    .topbar{
-        height:60px;
-    }
-
-    .settings-button{
-        left:10px;
-        top:11px;
-    }
-
-    .tab{
-        min-width:105px;
-        padding:9px 15px;
-    }
-
-    #generate,
-    #studio{
-        height:calc(100% - 60px);
-    }
-
-    .generate-sidebar{
-        width:200px;
-        min-width:200px;
-    }
-
-    .paper{
-        min-width:300px;
-    }
-
-    .studio-container{
-        padding-top:15px;
-    }
-
-    .studio-actions{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .studio-actions .next{
-        grid-column:span 2;
-    }
-
+:root{--a:#a855f7;--a2:#c084fc;--bg:#08050d;--p:#12091b;--b:#a855f755;--m:#c9a6e8}
+*{box-sizing:border-box;margin:0}
+html,body,#app{width:100%;height:100%}
+body{background:radial-gradient(circle at top,#301050,#08050d 65%);color:#fff;font:14px Arial,sans-serif;overflow:hidden}
+button,input,textarea,select{font:inherit}
+
+#auth{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#08050d;z-index:99}
+#pass{width:330px;padding:15px;border:1px solid var(--b);border-radius:12px;background:#0d0813;color:#fff;text-align:center;outline:0}
+
+#app{display:none}
+.top{height:65px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--b);background:#09050dcc;position:relative}
+.tabs{display:flex;gap:5px;padding:5px;border:1px solid var(--b);border-radius:12px}
+.tab{border:0;background:none;color:var(--m);padding:9px 30px;border-radius:8px;cursor:pointer}
+.tab.active{background:linear-gradient(135deg,var(--a),var(--a2));color:white}
+.gear{position:absolute;left:15px;width:38px;height:38px;border:1px solid var(--b);border-radius:10px;background:#150b20;color:white;cursor:pointer}
+
+#settings{position:fixed;z-index:50;left:-290px;top:0;width:280px;height:100%;padding:22px;background:#0d0615f7;border-right:1px solid var(--b);transition:.25s}
+#settings.open{left:0}
+.sethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.close{width:35px;height:35px;border:1px solid var(--b);border-radius:9px;background:#160b20;color:white;font-size:21px;cursor:pointer}
+#accent{width:100%;height:42px;padding:3px;background:#111;border:1px solid var(--b);border-radius:8px}
+
+#generate{height:calc(100% - 65px);display:flex}
+.side{width:270px;min-width:270px;padding:20px;background:#0d0714dd;border-right:1px solid var(--b);overflow:auto}
+.side h2{margin-bottom:20px}
+.control{margin-bottom:17px}
+.control label{display:flex;justify-content:space-between;color:var(--m);font-size:12px;margin-bottom:7px}
+select,textarea{width:100%;border:1px solid var(--b);border-radius:8px;background:#09050d;color:white;outline:0}
+select{height:40px;padding:0 9px}
+textarea{height:115px;padding:10px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--a)}
+.color{width:100%;height:38px;padding:2px;border:1px solid var(--b);border-radius:8px;background:#111}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.btn{padding:9px;border:1px solid var(--b);border-radius:8px;background:#160b20;color:#fff;cursor:pointer}
+.danger{width:100%;margin-top:7px;padding:9px;border:1px solid #ef444477;border-radius:8px;background:none;color:#ff8888;cursor:pointer}
+.exports{display:grid;gap:8px;margin-top:25px}
+.export{padding:11px;border:0;border-radius:8px;background:linear-gradient(135deg,var(--a),var(--a2));color:white;font-weight:bold;cursor:pointer}
+
+.paperArea{flex:1;display:flex;align-items:center;justify-content:center;padding:25px;overflow:auto}
+.paper{width:min(720px,75vw);height:min(850px,85vh);min-width:400px;min-height:500px;background:white;box-shadow:0 20px 60px #0008}
+#genCanvas{width:100%;height:100%;display:block}
+
+#studio{display:none;height:calc(100% - 65px);align-items:center;justify-content:center;overflow:auto}
+.studioBox{width:min(620px,92vw);display:flex;flex-direction:column;gap:13px;align-items:center;padding:20px 0}
+.studioTop,.nameRow,.actions{width:100%;display:flex;gap:8px}
+.studioTop select,.nameRow input{flex:1}
+.studioTop button,.nameRow button,.actions button{padding:10px;border:1px solid var(--b);border-radius:8px;background:#160b20;color:white;cursor:pointer}
+.nameRow button,.actions .next{background:linear-gradient(135deg,var(--a),var(--a2));border:0}
+.char{font-size:52px;font-weight:bold;text-shadow:0 0 20px var(--a)}
+.counter{font-size:12px;color:var(--m)}
+.canvasBox{width:100%;aspect-ratio:1;background:white;border-radius:14px;overflow:hidden;box-shadow:0 0 40px #a855f733}
+#drawCanvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.nameRow input{padding:10px;border:1px solid var(--b);border-radius:8px;background:#09050d;color:white;outline:0}
+.actions button{flex:1}
+.actions button:disabled{opacity:.3}
+.hint{font-size:11px;color:#ffffff66;text-align:center}
+
+@media(max-width:700px){
+ .side{width:210px;min-width:210px;padding:13px}
+ .paper{min-width:300px}
+ .tab{padding:9px 18px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     PASSWORD
-========================================================= -->
-
 <div id="auth">
-
-    <input
-        id="passwordInput"
-        type="password"
-        placeholder="Enter password"
-        autocomplete="off"
-    >
-
+<input id="pass" type="password" placeholder="Enter password">
 </div>
-
-
-<!-- =========================================================
-     APP
-========================================================= -->
 
 <div id="app">
 
-    <!-- TOP -->
-
-    <div class="topbar">
-
-        <button
-            class="settings-button"
-            id="settingsButton"
-        >⚙</button>
-
-        <div class="tabs">
-
-            <button
-                class="tab active"
-                id="generateTab"
-            >
-                Generate
-            </button>
-
-            <button
-                class="tab"
-                id="studioTab"
-            >
-                Studio
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         SETTINGS
-    ====================================================== -->
-
-    <div
-        class="settings-panel"
-        id="settingsPanel"
-    >
-
-        <div class="settings-header">
-
-            <h2>Settings</h2>
-
-            <button
-                class="close-settings"
-                id="closeSettings"
-            >×</button>
-
-        </div>
-
-        <div class="setting">
-
-            <label>Interface color</label>
-
-            <input
-                type="color"
-                id="accentColor"
-                value="#a855f7"
-            >
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         GENERATE
-    ====================================================== -->
-
-    <section id="generate">
-
-        <aside class="generate-sidebar">
-
-            <h2>Generate</h2>
-
-
-            <!-- FONT -->
-
-            <div class="control">
-
-                <div class="control-title">
-                    <span>Font</span>
-                </div>
-
-                <select id="fontSelect"></select>
-
-                <div class="small-buttons">
-
-                    <button
-                        class="small-button"
-                        id="renameFont"
-                    >
-                        Rename
-                    </button>
-
-                    <button
-                        class="small-button"
-                        id="newFontGenerate"
-                    >
-                        New
-                    </button>
-
-                </div>
-
-                <button
-                    class="danger-button"
-                    id="deleteFont"
-                >
-                    Delete font
-                </button>
-
-            </div>
-
-
-            <!-- TEXT -->
-
-            <div class="control">
-
-                <div class="control-title">
-
-                    <span>Text</span>
-
-                    <span id="textLength">0</span>
-
-                </div>
-
-                <textarea
-                    id="textInput"
-                    placeholder="Write something..."
-                ></textarea>
-
-            </div>
-
-
-            <!-- SIZE -->
-
-            <div class="control">
-
-                <div class="control-title">
-
-                    <span>Font size</span>
-
-                    <span id="sizeValue">42</span>
-
-                </div>
-
-                <input
-                    class="range"
-                    id="fontSize"
-                    type="range"
-                    min="12"
-                    max="120"
-                    value="42"
-                >
-
-            </div>
-
-
-            <!-- SPACING -->
-
-            <div class="control">
-
-                <div class="control-title">
-
-                    <span>Letter spacing</span>
-
-                    <span id="spacingValue">0</span>
-
-                </div>
-
-                <input
-                    class="range"
-                    id="letterSpacing"
-                    type="range"
-                    min="-10"
-                    max="40"
-                    value="0"
-                >
-
-            </div>
-
-
-            <!-- TEXT COLOR -->
-
-            <div class="control">
-
-                <div class="control-title">
-                    <span>Text color</span>
-                </div>
-
-                <input
-                    class="color-picker"
-                    id="textColor"
-                    type="color"
-                    value="#111111"
-                >
-
-            </div>
-
-
-            <!-- BACKGROUND -->
-
-            <div class="control">
-
-                <div class="control-title">
-                    <span>Paper background</span>
-                </div>
-
-                <div class="small-buttons">
-
-                    <button
-                        class="small-button bgPreset"
-                        data-color="#ffffff"
-                    >
-                        White
-                    </button>
-
-                    <button
-                        class="small-button bgPreset"
-                        data-color="#f5f1e8"
-                    >
-                        Cream
-                    </button>
-
-                    <button
-                        class="small-button bgPreset"
-                        data-color="#e9eef5"
-                    >
-                        Blue
-                    </button>
-
-                    <button
-                        class="small-button bgPreset"
-                        data-color="#111111"
-                    >
-                        Black
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="control">
-
-                <div class="control-title">
-                    <span>Custom background</span>
-                </div>
-
-                <input
-                    class="color-picker"
-                    id="paperColor"
-                    type="color"
-                    value="#ffffff"
-                >
-
-            </div>
-
-
-            <!-- EXPORT -->
-
-            <div class="export-title">
-                Export
-            </div>
-
-            <div class="export-buttons">
-
-                <button
-                    class="export-button"
-                    id="pngButton"
-                >
-                    Save as PNG
-                </button>
-
-                <button
-                    class="export-button"
-                    id="pdfButton"
-                >
-                    Save as PDF
-                </button>
-
-                <button
-                    class="export-button"
-                    id="goodNotesButton"
-                >
-                    Save for GoodNotes
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <main class="paper-area">
-
-            <div class="paper">
-
-                <canvas
-                    id="generateCanvas"
-                ></canvas>
-
-            </div>
-
-        </main>
-
-    </section>
-
-
-    <!-- =====================================================
-         STUDIO
-    ====================================================== -->
-
-    <section id="studio">
-
-        <div class="studio-container">
-
-
-            <!-- FONT SELECT -->
-
-            <div class="studio-top">
-
-                <div class="font-selector">
-
-                    <select id="studioFontSelect"></select>
-
-                </div>
-
-                <button
-                    class="new-font-button"
-                    id="newFontStudio"
-                >
-                    New font
-                </button>
-
-            </div>
-
-
-            <!-- CHARACTER -->
-
-            <div class="current-character">
-
-                <div
-                    class="character-preview"
-                    id="currentCharacter"
-                >
-                    A
-                </div>
-
-                <div
-                    class="character-counter"
-                    id="characterCounter"
-                >
-                    Character 1
-                </div>
-
-            </div>
-
-
-            <!-- DRAWING -->
-
-            <div class="canvas-frame">
-
-                <canvas
-                    id="studioCanvas"
-                ></canvas>
-
-            </div>
-
-
-            <!-- NAME -->
-
-            <div class="font-name-row">
-
-                <input
-                    id="fontNameInput"
-                    value="My Font"
-                    placeholder="Font name"
-                >
-
-                <button id="saveFontButton">
-                    Save font
-                </button>
-
-            </div>
-
-
-            <!-- NAVIGATION -->
-
-            <div class="studio-actions">
-
-                <button id="backButton">
-                    ← Back
-                </button>
-
-                <button id="clearButton">
-                    Clear
-                </button>
-
-                <button
-                    class="next"
-                    id="nextButton"
-                >
-                    Next →
-                </button>
-
-            </div>
-
-
-            <div class="studio-hint">
-                Write over the gray character. The red lines are only guides.
-            </div>
-
-        </div>
-
-    </section>
+<div class="top">
+<button class="gear" id="gear">⚙</button>
+<div class="tabs">
+<button class="tab active" id="gtab">Generate</button>
+<button class="tab" id="stab">Studio</button>
+</div>
+</div>
+
+<div id="settings">
+<div class="sethead">
+<h2>Settings</h2>
+<button class="close" id="close">×</button>
+</div>
+<label style="color:var(--m)">Interface color</label>
+<input id="accent" type="color" value="#a855f7">
+</div>
+
+<!-- GENERATE -->
+<section id="generate">
+
+<aside class="side">
+<h2>Generate</h2>
+
+<div class="control">
+<label>Font</label>
+<select id="fontSelect"></select>
+<div class="btns" style="margin-top:7px">
+<button class="btn" id="rename">Rename</button>
+<button class="btn" id="new1">New</button>
+</div>
+<button class="danger" id="delete">Delete font</button>
+</div>
+
+<div class="control">
+<label>Text <span id="len">0</span></label>
+<textarea id="text" placeholder="Write something..."></textarea>
+</div>
+
+<div class="control">
+<label>Font size <span id="sv">42</span></label>
+<input id="size" type="range" min="10" max="120" value="42">
+</div>
+
+<div class="control">
+<label>Letter spacing <span id="spv">0</span></label>
+<input id="spacing" type="range" min="-10" max="40" value="0">
+</div>
+
+<div class="control">
+<label>Text color</label>
+<input class="color" id="textColor" type="color" value="#111111">
+</div>
+
+<div class="control">
+<label>Paper background</label>
+<input class="color" id="paperColor" type="color" value="#ffffff">
+</div>
+
+<div class="exports">
+<button class="export" id="png">Save as PNG</button>
+<button class="export" id="pdf">Save as PDF</button>
+<button class="export" id="good">Save for GoodNotes</button>
+</div>
+</aside>
+
+<div class="paperArea">
+<div class="paper"><canvas id="genCanvas"></canvas></div>
+</div>
+
+</section>
+
+
+<!-- STUDIO -->
+<section id="studio">
+
+<div class="studioBox">
+
+<div class="studioTop">
+<select id="studioFont"></select>
+<button id="new2">New font</button>
+</div>
+
+<div class="char" id="char">A</div>
+<div class="counter" id="counter">1 / 124</div>
+
+<div class="canvasBox">
+<canvas id="drawCanvas"></canvas>
+</div>
+
+<div class="nameRow">
+<input id="fontName" placeholder="Font name">
+<button id="saveFont">Save font</button>
+</div>
+
+<div class="actions">
+<button id="back">← Back</button>
+<button id="clear">Clear</button>
+<button class="next" id="next">Next →</button>
+</div>
+
+<div class="hint">
+Write with black over the gray character. The red lines are guides only.
+</div>
+
+</div>
+</section>
 
 </div>
 
-
 <script>
 
-/* =========================================================
-   PASSWORD
-========================================================= */
+/* ================= PASSWORD ================= */
 
-const PASSWORD = "0000";
+const $=id=>document.getElementById(id);
 
-const auth =
-    document.getElementById("auth");
-
-const passwordInput =
-    document.getElementById("passwordInput");
-
-const app =
-    document.getElementById("app");
-
-
-passwordInput.addEventListener(
-    "keydown",
-    function(event){
-
-        if(event.key !== "Enter")
-            return;
-
-        if(passwordInput.value === PASSWORD){
-
-            auth.style.display = "none";
-            app.style.display = "block";
-
-            setTimeout(function(){
-                resizeStudioCanvas();
-                drawStudio();
-                renderGenerate();
-            },50);
-
-        }else{
-
-            passwordInput.value = "";
-
-            passwordInput.animate(
-                [
-                    {transform:"translateX(0)"},
-                    {transform:"translateX(-8px)"},
-                    {transform:"translateX(8px)"},
-                    {transform:"translateX(-5px)"},
-                    {transform:"translateX(0)"}
-                ],
-                {
-                    duration:260
-                }
-            );
-
-        }
-
-    }
+$("pass").onkeydown=e=>{
+if(e.key==="Enter"){
+if($("pass").value==="0000"){
+$("auth").style.display="none";
+$("app").style.display="block";
+setTimeout(init,50);
+}else{
+$("pass").value="";
+$("pass").animate(
+[{transform:"translateX(-7px)"},{transform:"translateX(7px)"},{transform:"translateX(0)"}],
+{duration:220}
 );
+}
+}};
 
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+/* ================= SETTINGS ================= */
 
-const settingsPanel =
-    document.getElementById("settingsPanel");
+$("gear").onclick=()=>$("settings").classList.add("open");
+$("close").onclick=()=>$("settings").classList.remove("open");
 
-document
-    .getElementById("settingsButton")
-    .addEventListener("click",function(){
-
-        settingsPanel.classList.add("open");
-
-    });
-
-
-document
-    .getElementById("closeSettings")
-    .addEventListener("click",function(){
-
-        settingsPanel.classList.remove("open");
-
-    });
-
-
-const accentColor =
-    document.getElementById("accentColor");
-
-const savedAccent =
-    localStorage.getItem(
-        "handwriting_accent"
-    );
-
-if(savedAccent){
-
-    accentColor.value = savedAccent;
-
-    document.documentElement.style
-        .setProperty("--accent",savedAccent);
-
-    document.documentElement.style
-        .setProperty("--accent2",savedAccent);
-
+let ac=localStorage.getItem("hs_accent");
+if(ac){
+$("accent").value=ac;
+document.documentElement.style.setProperty("--a",ac);
+document.documentElement.style.setProperty("--a2",ac);
 }
 
-
-accentColor.addEventListener(
-    "input",
-    function(){
-
-        const color =
-            accentColor.value;
-
-        document.documentElement.style
-            .setProperty("--accent",color);
-
-        document.documentElement.style
-            .setProperty("--accent2",color);
-
-        localStorage.setItem(
-            "handwriting_accent",
-            color
-        );
-
-    }
-);
+$("accent").oninput=()=>{
+let c=$("accent").value;
+document.documentElement.style.setProperty("--a",c);
+document.documentElement.style.setProperty("--a2",c);
+localStorage.setItem("hs_accent",c);
+};
 
 
-/* =========================================================
-   TABS
-========================================================= */
+/* ================= FONTS ================= */
 
-const generate =
-    document.getElementById("generate");
+let fonts=JSON.parse(localStorage.getItem("hs_fonts")||"{}");
 
-const studio =
-    document.getElementById("studio");
-
-const generateTab =
-    document.getElementById("generateTab");
-
-const studioTab =
-    document.getElementById("studioTab");
-
-
-generateTab.addEventListener(
-    "click",
-    function(){
-
-        generate.style.display = "flex";
-        studio.style.display = "none";
-
-        generateTab.classList.add("active");
-        studioTab.classList.remove("active");
-
-        renderGenerate();
-
-    }
-);
-
-
-studioTab.addEventListener(
-    "click",
-    function(){
-
-        generate.style.display = "none";
-        studio.style.display = "flex";
-
-        studioTab.classList.add("active");
-        generateTab.classList.remove("active");
-
-        setTimeout(function(){
-
-            resizeStudioCanvas();
-            drawStudio();
-
-        },30);
-
-    }
-);
-
-
-/* =========================================================
-   FONT DATABASE
-========================================================= */
-
-let fonts;
-
-try{
-
-    fonts =
-        JSON.parse(
-            localStorage.getItem(
-                "handwriting_fonts"
-            ) || "{}"
-        );
-
-}catch{
-
-    fonts = {};
-
+if(!Object.keys(fonts).length){
+fonts["My Font"]={glyphs:{}};
+localStorage.setItem("hs_fonts",JSON.stringify(fonts));
 }
-
 
 function saveFonts(){
-
-    localStorage.setItem(
-        "handwriting_fonts",
-        JSON.stringify(fonts)
-    );
-
+localStorage.setItem("hs_fonts",JSON.stringify(fonts));
 }
 
-
-/* =========================================================
-   CREATE DEFAULT FONT
-========================================================= */
-
-if(
-    !fonts["My Font"]
-){
-
-    fonts["My Font"] = {
-        name:"My Font",
-        glyphs:{}
-    };
-
-    saveFonts();
-
-}
-
-
-/* =========================================================
-   ENGLISH + GERMAN CHARACTER SET
-========================================================= */
-
-const characters = [
-    ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    ..."abcdefghijklmnopqrstuvwxyz",
-
-    /* German */
-    ..."ÄÖÜ",
-    ..."äöü",
-    ..."ß",
-
-    /* Numbers */
-    ..."0123456789",
-
-    /* English / German punctuation */
-    ...".,!?;:'\"-–—_",
-    ..."()[]{}",
-    ..."/\\",
-    ..."@#$%&*+=<>",
-    ..."€£¥",
-    ..."©®™",
-    ..."°§",
-    ..."…",
-    ..."«»",
-    ..."„“”",
-    ..."’"
+const chars=[
+..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+..."abcdefghijklmnopqrstuvwxyz",
+..."ÄÖÜäöüß",
+..."0123456789",
+...`.,!?;:'"-–—_()[]{}/\\@#$%&*+=<>€£¥©®™°§…«»„“”’`
 ];
 
+let fontName="My Font";
+let index=0;
 
-/* =========================================================
-   FONT SELECTS
-========================================================= */
+function lists(){
 
-const fontSelect =
-    document.getElementById("fontSelect");
+$("fontSelect").innerHTML="";
+$("studioFont").innerHTML="";
 
-const studioFontSelect =
-    document.getElementById("studioFontSelect");
+Object.keys(fonts).forEach(n=>{
+let a=new Option(n,n);
+let b=new Option(n,n);
+$("fontSelect").add(a);
+$("studioFont").add(b);
+});
 
+$("fontSelect").value=fontName;
+$("studioFont").value=fontName;
+}
 
-let currentFontName = "My Font";
-
-
-function refreshFontLists(){
-
-    const currentGenerate =
-        fontSelect.value;
-
-    const currentStudio =
-        studioFontSelect.value;
-
-    fontSelect.innerHTML = "";
-    studioFontSelect.innerHTML = "";
+lists();
 
 
-    Object.keys(fonts).forEach(function(name){
+/* ================= TABS ================= */
 
-        const option1 =
-            document.createElement("option");
+$("gtab").onclick=()=>{
+$("generate").style.display="flex";
+$("studio").style.display="none";
+$("gtab").classList.add("active");
+$("stab").classList.remove("active");
+render();
+};
 
-        option1.value = name;
-        option1.textContent = name;
-
-        fontSelect.appendChild(option1);
-
-
-        const option2 =
-            document.createElement("option");
-
-        option2.value = name;
-        option2.textContent = name;
-
-        studioFontSelect.appendChild(option2);
-
-    });
-
-
-    if(fonts[currentGenerate]){
-
-        fontSelect.value =
-            currentGenerate;
-
-    }else{
-
-        fontSelect.value =
-            Object.keys(fonts)[0];
-
-    }
+$("stab").onclick=()=>{
+$("generate").style.display="none";
+$("studio").style.display="flex";
+$("stab").classList.add("active");
+$("gtab").classList.remove("active");
+setTimeout(()=>{
+resizeDraw();
+loadGlyph();
+},30);
+};
 
 
-    if(fonts[currentStudio]){
+/* ================= GENERATE ================= */
 
-        studioFontSelect.value =
-            currentStudio;
+const gc=$("genCanvas"),gx=gc.getContext("2d");
 
-    }else{
+function resizeGen(){
+let r=gc.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;
+gc.width=r.width*d;
+gc.height=r.height*d;
+gc.style.width=r.width+"px";
+gc.style.height=r.height+"px";
+gx.setTransform(d,0,0,d,0,0);
+render();
+}
 
-        studioFontSelect.value =
-            Object.keys(fonts)[0];
+function render(){
 
-    }
+if(!gc.width)return;
+
+let r=gc.getBoundingClientRect(),w=r.width,h=r.height;
+gx.fillStyle=$("paperColor").value;
+gx.fillRect(0,0,w,h);
+
+let f=fonts[$("fontSelect").value];
+if(!f)return;
+
+let text=$("text").value;
+let size=+$("size").value;
+let spacing=+$("spacing").value;
+
+$("len").textContent=text.length;
+$("sv").textContent=size;
+$("spv").textContent=spacing;
+
+let x=size,y=20,line=size*1.35;
+
+for(let ch of text){
+
+if(ch==="\n"){
+x=size;y+=line;continue;
+}
+
+let g=f.glyphs[ch];
+
+if(!g){
+
+gx.fillStyle=$("textColor").value;
+gx.font=size+"px Arial";
+gx.textBaseline="top";
+
+let ww=gx.measureText(ch).width;
+
+if(x+ww>w-size){
+x=size;y+=line;
+}
+
+gx.fillText(ch,x,y);
+x+=ww+spacing;
+continue;
+}
+
+let bw=g.box.w||100;
+let scale=size/100;
+let ww=bw*scale;
+
+if(x+ww>w-size){
+x=size;y+=line;
+}
+
+gx.strokeStyle=$("textColor").value;
+gx.lineWidth=(g.pen||5)*scale;
+gx.lineCap="round";
+gx.lineJoin="round";
+
+g.strokes.forEach(s=>{
+if(!s.length)return;
+gx.beginPath();
+s.forEach((p,i)=>{
+let px=x+(p.x-g.box.x)*scale;
+let py=y+(p.y-g.box.y)*scale;
+i?gx.lineTo(px,py):gx.moveTo(px,py);
+});
+gx.stroke();
+});
+
+x+=ww+spacing;
+if(y+line>h)break;
+}
+}
+
+$("text").oninput=render;
+$("size").oninput=render;
+$("spacing").oninput=render;
+$("textColor").oninput=render;
+$("paperColor").oninput=render;
+
+$("fontSelect").onchange=()=>{
+fontName=$("fontSelect").value;
+$("studioFont").value=fontName;
+render();
+};
 
 
-    currentFontName =
-        studioFontSelect.value;
+/* ================= STUDIO CANVAS ================= */
 
+const dc=$("drawCanvas"),dx=dc.getContext("2d");
+let W=0,H=0;
+let strokes=[];
+let active=null;
+
+function resizeDraw(){
+
+let r=dc.getBoundingClientRect(),d=devicePixelRatio||1;
+W=r.width;
+H=r.height;
+
+dc.width=W*d;
+dc.height=H*d;
+dx.setTransform(d,0,0,d,0,0);
+draw();
+}
+
+function draw(){
+
+dx.clearRect(0,0,W,H);
+dx.fillStyle="#fff";
+dx.fillRect(0,0,W,H);
+
+/* red notebook lines */
+dx.strokeStyle="rgba(220,40,50,.38)";
+dx.lineWidth=1.5;
+
+[.22,.42,.62,.82].forEach(v=>{
+let y=H*v;
+dx.beginPath();
+dx.moveTo(0,y);
+dx.lineTo(W,y);
+dx.stroke();
+});
+
+/* gray character */
+let c=chars[index];
+
+if(c!==" "){
+dx.fillStyle="rgba(70,70,70,.20)";
+dx.font="500 "+H*.58+"px Arial";
+dx.textAlign="center";
+dx.textBaseline="middle";
+dx.fillText(c,W/2,H*.52);
+}
+
+/* black writing */
+dx.strokeStyle="#000";
+dx.lineWidth=5;
+dx.lineCap="round";
+dx.lineJoin="round";
+
+strokes.forEach(s=>{
+if(!s.length)return;
+dx.beginPath();
+s.forEach((p,i)=>{
+i?dx.lineTo(p.x,p.y):dx.moveTo(p.x,p.y);
+});
+dx.stroke();
+});
 }
 
 
-refreshFontLists();
+/* ================= REAL DRAWING ================= */
+
+dc.onpointerdown=e=>{
+e.preventDefault();
+dc.setPointerCapture(e.pointerId);
+
+let r=dc.getBoundingClientRect();
+
+active=[];
+strokes.push(active);
+
+active.push({
+x:e.clientX-r.left,
+y:e.clientY-r.top
+});
+
+draw();
+};
+
+dc.onpointermove=e=>{
+if(!active)return;
+
+e.preventDefault();
+
+let r=dc.getBoundingClientRect();
+
+active.push({
+x:e.clientX-r.left,
+y:e.clientY-r.top
+});
+
+draw();
+};
+
+function stop(){
+active=null;
+}
+
+dc.onpointerup=stop;
+dc.onpointercancel=stop;
 
 
-/* =========================================================
-   GENERATE CANVAS
-========================================================= */
+/* ================= SAVE GLYPH ================= */
 
-const generateCanvas =
-    document.getElementById("generateCanvas");
+function saveGlyph(){
 
-const generateCtx =
-    generateCanvas.getContext("2d");
+let f=fonts[fontName];
+if(!f)return;
 
+let c=chars[index];
 
-const textInput =
-    document.getElementById("textInput");
+if(!strokes.length){
+delete f.glyphs[c];
+saveFonts();
+return;
+}
 
-const fontSizeInput =
-    document.getElementById("fontSize");
+let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
 
-const letterSpacingInput =
-    document.getElementById("letterSpacing");
+strokes.forEach(s=>s.forEach(p=>{
+minX=Math.min(minX,p.x);
+minY=Math.min(minY,p.y);
+maxX=Math.max(maxX,p.x);
+maxY=Math.max(maxY,p.y);
+}));
 
-const textColorInput =
-    document.getElementById("textColor");
+if(!isFinite(minX))return;
 
-const paperColorInput =
-    document.getElementById("paperColor");
+let pad=8;
+minX-=pad;
+minY-=pad;
+maxX+=pad;
+maxY+=pad;
 
+f.glyphs[c]={
+strokes:strokes.map(s=>s.map(p=>({x:p.x,y:p.y}))),
+box:{
+x:minX,
+y:minY,
+w:maxX-minX,
+h:maxY-minY
+},
+pen:5
+};
 
-function resizeGenerateCanvas(){
-
-    const rect =
-        generateCanvas.parentElement
-            .getBoundingClientRect();
-
-    const ratio =
-        window.devicePixelRatio || 1;
-
-    generateCanvas.width =
-        rect.width * ratio;
-
-    generateCanvas.height =
-        rect.height * ratio;
-
-    generateCanvas.style.width =
-        rect.width + "px";
-
-    generateCanvas.style.height =
-        rect.height + "px";
-
-    generateCtx.setTransform(
-        ratio,
-        0,
-        0,
-        ratio,
-        0,
-        0
-    );
-
-    renderGenerate();
-
+saveFonts();
 }
 
 
-function drawGlyph(
-    ctx,
-    glyph,
-    x,
-    y,
-    size,
-    color
-){
+/* ================= LOAD GLYPH ================= */
 
-    if(!glyph)
-        return;
+function loadGlyph(){
 
-    const box =
-        glyph.box || {
-            x:0,
-            y:0,
-            w:1,
-            h:1
-        };
+let f=fonts[fontName];
+let g=f&&f.glyphs[chars[index]];
 
+strokes=g
+?g.strokes.map(s=>s.map(p=>({x:p.x,y:p.y})))
+:[];
 
-    const scaleX =
-        size / 100;
+$("char").textContent=chars[index];
+$("counter").textContent=(index+1)+" / "+chars.length;
+$("back").disabled=index===0;
+$("fontName").value=fontName;
 
-    const scaleY =
-        size / 100;
-
-
-    ctx.save();
-
-    ctx.strokeStyle =
-        color;
-
-    ctx.lineWidth =
-        Math.max(
-            1,
-            (glyph.penSize || 5) *
-            scaleX
-        );
-
-    ctx.lineCap =
-        "round";
-
-    ctx.lineJoin =
-        "round";
-
-
-    glyph.strokes.forEach(
-        function(stroke){
-
-            if(stroke.length === 0)
-                return;
-
-            ctx.beginPath();
-
-            for(
-                let i = 0;
-                i < stroke.length;
-                i++
-            ){
-
-                const p =
-                    stroke[i];
-
-                const px =
-                    x +
-                    (p.x - box.x) *
-                    scaleX;
-
-                const py =
-                    y +
-                    (p.y - box.y) *
-                    scaleY;
-
-                if(i === 0){
-
-                    ctx.moveTo(
-                        px,
-                        py
-                    );
-
-                }else{
-
-                    ctx.lineTo(
-                        px,
-                        py
-                    );
-
-                }
-
-            }
-
-            ctx.stroke();
-
-        }
-    );
-
-    ctx.restore();
-
+draw();
 }
 
 
-/* =========================================================
-   GENERATE TEXT
-========================================================= */
+/* ================= NEXT/BACK ================= */
 
-function renderGenerate(){
+$("next").onclick=()=>{
+saveGlyph();
+if(index<chars.length-1){
+index++;
+loadGlyph();
+}
+};
 
-    if(!generateCanvas.width)
-        return;
+$("back").onclick=()=>{
+if(index===0)return;
+saveGlyph();
+index--;
+loadGlyph();
+};
 
-    const rect =
-        generateCanvas
-            .getBoundingClientRect();
+$("clear").onclick=()=>{
+strokes=[];
+saveGlyph();
+draw();
+};
 
-    const width =
-        rect.width;
 
-    const height =
-        rect.height;
+/* ================= FONT SAVE ================= */
 
+$("saveFont").onclick=()=>{
 
-    const bg =
-        paperColorInput.value;
+let n=$("fontName").value.trim();
 
-    generateCtx.fillStyle =
-        bg;
+if(!n)return;
 
-    generateCtx.fillRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const text =
-        textInput.value;
-
-
-    document.getElementById("textLength")
-        .textContent =
-        text.length;
-
-
-    const size =
-        Number(fontSizeInput.value);
-
-    const spacing =
-        Number(letterSpacingInput.value);
-
-
-    document.getElementById("sizeValue")
-        .textContent =
-        size;
-
-    document.getElementById("spacingValue")
-        .textContent =
-        spacing;
-
-
-    const font =
-        fonts[fontSelect.value];
-
-
-    if(!font)
-        return;
-
-
-    const padding =
-        Math.max(
-            30,
-            size
-        );
-
-
-    let x =
-        padding;
-
-    let y =
-        padding;
-
-    const lineHeight =
-        size * 1.35;
-
-
-    for(
-        let i = 0;
-        i < text.length;
-        i++
-    ){
-
-        const char =
-            text[i];
-
-
-        if(char === "\n"){
-
-            x = padding;
-            y += lineHeight;
-
-            continue;
-
-        }
-
-
-        let glyph =
-            font.glyphs[char];
-
-
-        /*
-          Missing characters use a normal
-          system-font fallback.
-        */
-
-        if(!glyph){
-
-            generateCtx.fillStyle =
-                textColorInput.value;
-
-            generateCtx.font =
-                `${size}px Arial`;
-
-            generateCtx.textBaseline =
-                "top";
-
-            const fallbackWidth =
-                generateCtx.measureText(char)
-                    .width;
-
-            if(
-                x + fallbackWidth >
-                width - padding
-            ){
-
-                x = padding;
-                y += lineHeight;
-
-            }
-
-            generateCtx.fillText(
-                char,
-                x,
-                y
-            );
-
-            x +=
-                fallbackWidth +
-                spacing;
-
-            continue;
-
-        }
-
-
-        const glyphWidth =
-            size *
-            (glyph.advance || 1);
-
-
-        if(
-            x + glyphWidth >
-            width - padding
-        ){
-
-            x = padding;
-            y += lineHeight;
-
-        }
-
-
-        drawGlyph(
-            generateCtx,
-            glyph,
-            x,
-            y,
-            size,
-            textColorInput.value
-        );
-
-
-        x +=
-            glyphWidth +
-            spacing;
-
-
-        if(
-            y + lineHeight >
-            height
-        ){
-
-            break;
-
-        }
-
-    }
-
+if(n!==fontName&&fonts[n]){
+alert("A font with this name already exists.");
+return;
 }
 
-
-/* =========================================================
-   GENERATE CONTROLS
-========================================================= */
-
-textInput.addEventListener(
-    "input",
-    renderGenerate
-);
-
-fontSizeInput.addEventListener(
-    "input",
-    renderGenerate
-);
-
-letterSpacingInput.addEventListener(
-    "input",
-    renderGenerate
-);
-
-textColorInput.addEventListener(
-    "input",
-    renderGenerate
-);
-
-paperColorInput.addEventListener(
-    "input",
-    renderGenerate
-);
-
-fontSelect.addEventListener(
-    "change",
-    renderGenerate
-);
-
-
-document
-    .querySelectorAll(".bgPreset")
-    .forEach(function(button){
-
-        button.addEventListener(
-            "click",
-            function(){
-
-                const color =
-                    button.dataset.color;
-
-                paperColorInput.value =
-                    color;
-
-                renderGenerate();
-
-            }
-        );
-
-    });
-
-
-/* =========================================================
-   STUDIO CANVAS
-========================================================= */
-
-const studioCanvas =
-    document.getElementById("studioCanvas");
-
-const studioCtx =
-    studioCanvas.getContext("2d");
-
-
-let studioWidth = 600;
-let studioHeight = 600;
-
-let strokes = [];
-let currentStroke = null;
-let drawing = false;
-
-
-/* =========================================================
-   STUDIO RESIZE
-========================================================= */
-
-function resizeStudioCanvas(){
-
-    const rect =
-        studioCanvas.getBoundingClientRect();
-
-    if(
-        rect.width <= 0 ||
-        rect.height <= 0
-    )
-        return;
-
-
-    const ratio =
-        window.devicePixelRatio || 1;
-
-    studioWidth =
-        rect.width;
-
-    studioHeight =
-        rect.height;
-
-
-    studioCanvas.width =
-        rect.width * ratio;
-
-    studioCanvas.height =
-        rect.height * ratio;
-
-
-    studioCtx.setTransform(
-        ratio,
-        0,
-        0,
-        ratio,
-        0,
-        0
-    );
-
+if(n!==fontName){
+fonts[n]=fonts[fontName];
+delete fonts[fontName];
+fontName=n;
 }
 
+saveGlyph();
+saveFonts();
+lists();
 
-/* =========================================================
-   STUDIO GUIDE
-========================================================= */
-
-function drawNotebookLines(){
-
-    /*
-      White page
-    */
-
-    studioCtx.fillStyle =
-        "#ffffff";
-
-    studioCtx.fillRect(
-        0,
-        0,
-        studioWidth,
-        studioHeight
-    );
+$("fontSelect").value=fontName;
+$("studioFont").value=fontName;
+render();
+};
 
 
-    /*
-      Four red translucent lines.
+/* ================= NEW FONT ================= */
 
-      These create:
-      - top guide
-      - upper writing line
-      - lower writing line
-      - bottom guide
-    */
+function newFont(){
 
-    studioCtx.save();
+let n=prompt("Enter the new font name:");
+if(!n)return;
 
-    studioCtx.strokeStyle =
-        "rgba(220,45,55,.38)";
+n=n.trim();
+if(!n)return;
 
-    studioCtx.lineWidth = 1.5;
-
-
-    const lines = [
-        studioHeight * 0.22,
-        studioHeight * 0.42,
-        studioHeight * 0.62,
-        studioHeight * 0.82
-    ];
-
-
-    lines.forEach(
-        function(y){
-
-            studioCtx.beginPath();
-
-            studioCtx.moveTo(
-                0,
-                y
-            );
-
-            studioCtx.lineTo(
-                studioWidth,
-                y
-            );
-
-            studioCtx.stroke();
-
-        }
-    );
-
-    studioCtx.restore();
-
+if(fonts[n]){
+alert("A font with this name already exists.");
+return;
 }
 
+fonts[n]={glyphs:{}};
+fontName=n;
+index=0;
+strokes=[];
 
-/* =========================================================
-   GRAY CHARACTER GUIDE
-========================================================= */
-
-function drawCharacterGuide(){
-
-    const char =
-        characters[studioIndex];
-
-
-    /*
-      Space doesn't need a visible guide.
-    */
-
-    if(char === " ")
-        return;
-
-
-    studioCtx.save();
-
-    studioCtx.fillStyle =
-        "rgba(75,75,75,.20)";
-
-    studioCtx.font =
-        `500 ${studioHeight * .58}px Arial`;
-
-    studioCtx.textAlign =
-        "center";
-
-    studioCtx.textBaseline =
-        "middle";
-
-
-    studioCtx.fillText(
-        char,
-        studioWidth / 2,
-        studioHeight * .52
-    );
-
-
-    studioCtx.restore();
-
+saveFonts();
+lists();
+loadGlyph();
 }
 
-
-/* =========================================================
-   USER DRAWING
-========================================================= */
-
-function drawUserStrokes(){
-
-    studioCtx.save();
-
-    /*
-      Always BLACK.
-    */
-
-    studioCtx.strokeStyle =
-        "#000000";
-
-    studioCtx.fillStyle =
-        "#000000";
-
-    studioCtx.lineWidth = 5;
-
-    studioCtx.lineCap =
-        "round";
-
-    studioCtx.lineJoin =
-        "round";
+$("new1").onclick=newFont;
+$("new2").onclick=newFont;
 
 
-    strokes.forEach(
-        function(stroke){
+/* ================= RENAME ================= */
 
-            if(stroke.length === 0)
-                return;
+$("rename").onclick=()=>{
 
+let old=$("fontSelect").value;
+let n=prompt("New font name:",old);
 
-            /*
-              A single point gets a small dot.
-            */
+if(!n)return;
 
-            if(stroke.length === 1){
+n=n.trim();
 
-                studioCtx.beginPath();
+if(!n||n===old)return;
 
-                studioCtx.arc(
-                    stroke[0].x,
-                    stroke[0].y,
-                    2.5,
-                    0,
-                    Math.PI * 2
-                );
-
-                studioCtx.fill();
-
-                return;
-
-            }
-
-
-            studioCtx.beginPath();
-
-            studioCtx.moveTo(
-                stroke[0].x,
-                stroke[0].y
-            );
-
-
-            for(
-                let i = 1;
-                i < stroke.length;
-                i++
-            ){
-
-                studioCtx.lineTo(
-                    stroke[i].x,
-                    stroke[i].y
-                );
-
-            }
-
-
-            studioCtx.stroke();
-
-        }
-    );
-
-
-    studioCtx.restore();
-
+if(fonts[n]){
+alert("A font with this name already exists.");
+return;
 }
 
+fonts[n]=fonts[old];
+delete fonts[old];
 
-/* =========================================================
-   DRAW EVERYTHING
-========================================================= */
+if(fontName===old)fontName=n;
 
-function drawStudio(){
+saveFonts();
+lists();
 
-    if(
-        studioWidth <= 0 ||
-        studioHeight <= 0
-    )
-        return;
+$("fontSelect").value=fontName;
+$("studioFont").value=fontName;
+
+loadGlyph();
+render();
+};
 
 
-    drawNotebookLines();
+/* ================= DELETE ================= */
 
-    drawCharacterGuide();
+$("delete").onclick=()=>{
 
-    drawUserStrokes();
+let n=$("fontSelect").value;
 
+if(Object.keys(fonts).length<=1){
+alert("You need at least one font.");
+return;
 }
 
+if(!confirm("Delete "+n+"?"))return;
 
-/* =========================================================
-   POINTER POSITION
-========================================================= */
+delete fonts[n];
 
-function getPointerPosition(event){
+if(fontName===n)
+fontName=Object.keys(fonts)[0];
 
-    const rect =
-        studioCanvas.getBoundingClientRect();
+saveFonts();
+lists();
+loadGlyph();
+render();
+};
 
-    return {
-        x:
-            event.clientX -
-            rect.left,
 
-        y:
-            event.clientY -
-            rect.top
-    };
+/* ================= STUDIO FONT CHANGE ================= */
 
-}
+$("studioFont").onchange=()=>{
+saveGlyph();
+fontName=$("studioFont").value;
+$("fontSelect").value=fontName;
+index=0;
+loadGlyph();
+};
 
 
-/* =========================================================
-   START DRAWING
-========================================================= */
+/* ================= PNG ================= */
 
-studioCanvas.addEventListener(
-    "pointerdown",
-    function(event){
+$("png").onclick=()=>{
 
-        event.preventDefault();
+render();
 
-        studioCanvas.setPointerCapture(
-            event.pointerId
-        );
-
-        drawing = true;
-
-        const p =
-            getPointerPosition(event);
-
-        currentStroke = [
-            {
-                x:p.x,
-                y:p.y
-            }
-        ];
-
-        strokes.push(
-            currentStroke
-        );
-
-        drawStudio();
-
-    }
-);
-
-
-/* =========================================================
-   DRAW
-========================================================= */
-
-studioCanvas.addEventListener(
-    "pointermove",
-    function(event){
-
-        if(!drawing)
-            return;
-
-        event.preventDefault();
-
-        const p =
-            getPointerPosition(event);
-
-        currentStroke.push({
-            x:p.x,
-            y:p.y
-        });
-
-        drawStudio();
-
-    }
-);
-
-
-/* =========================================================
-   STOP
-========================================================= */
-
-function stopDrawing(){
-
-    drawing = false;
-    currentStroke = null;
-
-}
-
-
-studioCanvas.addEventListener(
-    "pointerup",
-    stopDrawing
-);
-
-studioCanvas.addEventListener(
-    "pointercancel",
-    stopDrawing
-);
-
-
-/* =========================================================
-   SAVE CURRENT GLYPH
-========================================================= */
-
-function saveCurrentGlyph(){
-
-    const font =
-        fonts[currentFontName];
-
-    if(!font)
-        return;
-
-
-    const char =
-        characters[studioIndex];
-
-
-    /*
-      Find the drawing bounds.
-    */
-
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-
-    strokes.forEach(
-        function(stroke){
-
-            stroke.forEach(
-                function(point){
-
-                    minX =
-                        Math.min(
-                            minX,
-                            point.x
-                        );
-
-                    minY =
-                        Math.min(
-                            minY,
-                            point.y
-                        );
-
-                    maxX =
-                        Math.max(
-                            maxX,
-                            point.x
-                        );
-
-                    maxY =
-                        Math.max(
-                            maxY,
-                            point.y
-                        );
-
-                }
-            );
-
-        }
-    );
-
-
-    /*
-      If nothing was written,
-      don't create a glyph.
-    */
-
-    if(
-        strokes.length === 0 ||
-        !isFinite(minX)
-    ){
-
-        delete font.glyphs[char];
-
-        saveFonts();
-
-        return;
-
-    }
-
-
-    /*
-      A little padding around the glyph.
-    */
-
-    const padding = 8;
-
-
-    minX -= padding;
-    minY -= padding;
-    maxX += padding;
-    maxY += padding;
-
-
-    const width =
-        Math.max(
-            20,
-            maxX - minX
-        );
-
-
-    /*
-      Advance determines how much space
-      the character gets in Generate.
-    */
-
-    let advance =
-        width / studioHeight;
-
-
-    advance =
-        Math.max(
-            .45,
-            Math.min(
-                1.25,
-                advance
-            )
-        );
-
-
-    /*
-      Store normalized-independent canvas
-      coordinates. They will scale later.
-    */
-
-    font.glyphs[char] = {
-
-        strokes:
-            strokes.map(
-                function(stroke){
-
-                    return stroke.map(
-                        function(point){
-
-                            return {
-                                x:point.x,
-                                y:point.y
-                            };
-
-                        }
-                    );
-
-                }
-            ),
-
-        box:{
-            x:minX,
-            y:minY,
-            w:width,
-            h:
-                Math.max(
-                    20,
-                    maxY - minY
-                )
-        },
-
-        advance:advance,
-
-        penSize:5
-
-    };
-
-
-    saveFonts();
-
-}
-
-
-/* =========================================================
-   LOAD GLYPH
-========================================================= */
-
-function loadCurrentGlyph(){
-
-    const font =
-        fonts[currentFontName];
-
-
-    const char =
-        characters[studioIndex];
-
-
-    if(
-        font &&
-        font.glyphs &&
-        font.glyphs[char]
-    ){
-
-        const glyph =
-            font.glyphs[char];
-
-
-        strokes =
-            glyph.strokes.map(
-                function(stroke){
-
-                    return stroke.map(
-                        function(point){
-
-                            return {
-                                x:point.x,
-                                y:point.y
-                            };
-
-                        }
-                    );
-
-                }
-            );
-
-    }else{
-
-        strokes = [];
-
-    }
-
-
-    drawStudio();
-
-}
-
-
-/* =========================================================
-   UPDATE STUDIO UI
-========================================================= */
-
-function updateStudio(){
-
-    const char =
-        characters[studioIndex];
-
-
-    document
-        .getElementById("currentCharacter")
-        .textContent =
-            char === " "
-                ? "SPACE"
-                : char;
-
-
-    document
-        .getElementById("characterCounter")
-        .textContent =
-            `Character ${studioIndex + 1} / ${characters.length}`;
-
-
-    document
-        .getElementById("backButton")
-        .disabled =
-            studioIndex === 0;
-
-
-    document
-        .getElementById("fontNameInput")
-        .value =
-            currentFontName;
-
-
-    loadCurrentGlyph();
-
-}
-
-
-/* =========================================================
-   NEXT
-========================================================= */
-
-document
-    .getElementById("nextButton")
-    .addEventListener(
-        "click",
-        function(){
-
-            saveCurrentGlyph();
-
-            if(
-                studioIndex <
-                characters.length - 1
-            ){
-
-                studioIndex++;
-
-                updateStudio();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   BACK
-========================================================= */
-
-document
-    .getElementById("backButton")
-    .addEventListener(
-        "click",
-        function(){
-
-            if(studioIndex === 0)
-                return;
-
-
-            saveCurrentGlyph();
-
-            studioIndex--;
-
-            updateStudio();
-
-        }
-    );
-
-
-/* =========================================================
-   CLEAR
-========================================================= */
-
-document
-    .getElementById("clearButton")
-    .addEventListener(
-        "click",
-        function(){
-
-            strokes = [];
-
-            currentStroke = null;
-
-            saveCurrentGlyph();
-
-            drawStudio();
-
-        }
-    );
-
-
-/* =========================================================
-   STUDIO FONT CHANGE
-========================================================= */
-
-studioFontSelect.addEventListener(
-    "change",
-    function(){
-
-        saveCurrentGlyph();
-
-        currentFontName =
-            studioFontSelect.value;
-
-        updateStudio();
-
-    }
-);
-
-
-/* =========================================================
-   FONT NAME
-========================================================= */
-
-document
-    .getElementById("saveFontButton")
-    .addEventListener(
-        "click",
-        function(){
-
-            const input =
-                document
-                    .getElementById("fontNameInput")
-                    .value
-                    .trim();
-
-
-            if(!input)
-                return;
-
-
-            if(
-                input !== currentFontName &&
-                fonts[input]
-            ){
-
-                alert(
-                    "A font with this name already exists."
-                );
-
-                return;
-
-            }
-
-
-            if(
-                input !== currentFontName
-            ){
-
-                fonts[input] =
-                    fonts[currentFontName];
-
-                fonts[input].name =
-                    input;
-
-                delete fonts[currentFontName];
-
-                currentFontName =
-                    input;
-
-            }
-
-
-            saveCurrentGlyph();
-
-            refreshFontLists();
-
-            fontSelect.value =
-                currentFontName;
-
-            studioFontSelect.value =
-                currentFontName;
-
-            saveFonts();
-
-            renderGenerate();
-
-        }
-    );
-
-
-/* =========================================================
-   NEW FONT
-========================================================= */
-
-function createNewFont(){
-
-    const name =
-        prompt(
-            "Enter the new font name:"
-        );
-
-
-    if(!name)
-        return;
-
-
-    const clean =
-        name.trim();
-
-
-    if(!clean)
-        return;
-
-
-    if(fonts[clean]){
-
-        alert(
-            "A font with this name already exists."
-        );
-
-        return;
-
-    }
-
-
-    /*
-      Save the current glyph first.
-    */
-
-    saveCurrentGlyph();
-
-
-    fonts[clean] = {
-        name:clean,
-        glyphs:{}
-    };
-
-
-    saveFonts();
-
-
-    currentFontName =
-        clean;
-
-
-    studioIndex = 0;
-
-
-    refreshFontLists();
-
-
-    fontSelect.value =
-        clean;
-
-    studioFontSelect.value =
-        clean;
-
-
-    updateStudio();
-
-}
-
-
-document
-    .getElementById("newFontStudio")
-    .addEventListener(
-        "click",
-        createNewFont
-    );
-
-
-document
-    .getElementById("newFontGenerate")
-    .addEventListener(
-        "click",
-        createNewFont
-    );
-
-
-/* =========================================================
-   RENAME FONT
-========================================================= */
-
-document
-    .getElementById("renameFont")
-    .addEventListener(
-        "click",
-        function(){
-
-            const oldName =
-                fontSelect.value;
-
-
-            const newName =
-                prompt(
-                    "New font name:",
-                    oldName
-                );
-
-
-            if(!newName)
-                return;
-
-
-            const clean =
-                newName.trim();
-
-
-            if(
-                !clean ||
-                clean === oldName
-            )
-                return;
-
-
-            if(fonts[clean]){
-
-                alert(
-                    "A font with this name already exists."
-                );
-
-                return;
-
-            }
-
-
-            fonts[clean] =
-                fonts[oldName];
-
-            fonts[clean].name =
-                clean;
-
-            delete fonts[oldName];
-
-
-            if(
-                currentFontName === oldName
-            ){
-
-                currentFontName =
-                    clean;
-
-            }
-
-
-            saveFonts();
-
-            refreshFontLists();
-
-            fontSelect.value =
-                clean;
-
-            studioFontSelect.value =
-                currentFontName;
-
-            document
-                .getElementById("fontNameInput")
-                .value =
-                    currentFontName;
-
-            renderGenerate();
-
-        }
-    );
-
-
-/* =========================================================
-   DELETE FONT
-========================================================= */
-
-document
-    .getElementById("deleteFont")
-    .addEventListener(
-        "click",
-        function(){
-
-            const name =
-                fontSelect.value;
-
-
-            if(
-                Object.keys(fonts).length <= 1
-            ){
-
-                alert(
-                    "You need at least one font."
-                );
-
-                return;
-
-            }
-
-
-            if(
-                !confirm(
-                    `Delete "${name}"?`
-                )
-            )
-                return;
-
-
-            delete fonts[name];
-
-
-            if(
-                currentFontName === name
-            ){
-
-                currentFontName =
-                    Object.keys(fonts)[0];
-
-            }
-
-
-            saveFonts();
-
-            refreshFontLists();
-
-            fontSelect.value =
-                currentFontName;
-
-            studioFontSelect.value =
-                currentFontName;
-
-            updateStudio();
-
-            renderGenerate();
-
-        }
-    );
-
-
-/* =========================================================
-   PNG EXPORT
-========================================================= */
-
-document
-    .getElementById("pngButton")
-    .addEventListener(
-        "click",
-        function(){
-
-            renderGenerate();
-
-
-            generateCanvas.toBlob(
-                function(blob){
-
-                    if(!blob)
-                        return;
-
-
-                    const url =
-                        URL.createObjectURL(blob);
-
-
-                    const link =
-                        document.createElement("a");
-
-
-                    link.href = url;
-
-                    link.download =
-                        "handwriting-sheet.png";
-
-
-                    document.body.appendChild(link);
-
-                    link.click();
-
-                    link.remove();
-
-                    URL.revokeObjectURL(url);
-
-                },
-                "image/png"
-            );
-
-        }
-    );
-
-
-/* =========================================================
-   PDF / GOODNOTES EXPORT
-========================================================= */
-
-function printSheet(){
-
-    renderGenerate();
-
-    const data =
-        generateCanvas.toDataURL(
-            "image/png"
-        );
-
-
-    const popup =
-        window.open(
-            "",
-            "_blank"
-        );
-
-
-    if(!popup){
-
-        alert(
-            "Please allow pop-ups to export the PDF."
-        );
-
-        return;
-
-    }
-
-
-    popup.document.write(`
-<!DOCTYPE html>
-<html>
-<head>
-<title>Handwriting Sheet</title>
-
-<style>
-
-html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    background:white;
-}
-
-body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-img{
-    max-width:100%;
-    max-height:100%;
-}
-
-@page{
-    margin:0;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<img src="${data}">
-
-<script>
-
-window.onload=function(){
-
-    setTimeout(function(){
-
-        window.print();
-
-    },300);
+gc.toBlob(blob=>{
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="handwriting-sheet.png";
+a.click();
+setTimeout(()=>URL.revokeObjectURL(a.href),500);
+},"image/png");
 
 };
 
-<\/script>
 
+/* ================= PDF / GOODNOTES ================= */
+
+function printPDF(){
+
+render();
+
+let data=gc.toDataURL("image/png");
+
+let w=window.open("","_blank");
+
+if(!w){
+alert("Please allow pop-ups.");
+return;
+}
+
+w.document.write(`
+<html>
+<head>
+<title>Handwriting Sheet</title>
+<style>
+html,body{margin:0;width:100%;height:100%}
+body{display:flex;align-items:center;justify-content:center}
+img{width:100%;height:100%;object-fit:contain}
+@page{margin:0}
+</style>
+</head>
+<body>
+<img src="${data}">
+<script>
+window.onload=()=>setTimeout(()=>window.print(),300);
+<\/script>
 </body>
 </html>
-    `);
+`);
 
-    popup.document.close();
+w.document.close();
+}
+
+$("pdf").onclick=printPDF;
+$("good").onclick=printPDF;
+
+
+/* ================= INIT ================= */
+
+function init(){
+
+resizeGen();
+resizeDraw();
+loadGlyph();
+render();
 
 }
 
-
-document
-    .getElementById("pdfButton")
-    .addEventListener(
-        "click",
-        printSheet
-    );
-
-
-document
-    .getElementById("goodNotesButton")
-    .addEventListener(
-        "click",
-        printSheet
-    );
-
-
-/* =========================================================
-   WINDOW RESIZE
-========================================================= */
-
-window.addEventListener(
-    "resize",
-    function(){
-
-        if(
-            studio.style.display !== "none"
-        ){
-
-            resizeStudioCanvas();
-            drawStudio();
-
-        }
-
-
-        if(
-            generate.style.display !== "none"
-        ){
-
-            resizeGenerateCanvas();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
-
-resizeGenerateCanvas();
-
-setTimeout(
-    function(){
-
-        refreshFontLists();
-
-        resizeStudioCanvas();
-
-        updateStudio();
-
-        renderGenerate();
-
-    },
-    100
-);
+window.onresize=()=>{
+if($("studio").style.display!=="none"){
+resizeDraw();
+draw();
+}else{
+resizeGen();
+}
+};
 
 </script>
-
 </body>
 </html>
