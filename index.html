@@ -241,7 +241,6 @@ button{cursor:pointer}
   <div class="codePrice">5€ für <b>code</b></div>
   <input id="pass" type="password" placeholder="Enter" autocomplete="off">
   <button id="loginBtn" type="button">Enter</button>
-  <div class="adminHint"> <b></b></div>
  </div>
 </div>
 
@@ -390,6 +389,8 @@ const firebaseConfig={
 
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
 const SITE_PASSWORD="55555";
 const ADMIN_CODE="3ed43ef3";
@@ -740,41 +741,56 @@ async function refreshAdminUsers(){
 
  if(!firebaseIsAdmin)return;
 
- const snap=await db.ref("presence").once("value");
- const users=snap.val()||{};
  const list=$("adminUsers");
+ list.innerHTML="<div style=\"color:#777;font-size:12px\">Loading...</div>";
 
- list.innerHTML="";
+ try{
+  const [usersSnap,presenceSnap]=await Promise.all([
+   db.ref("users").once("value"),
+   db.ref("presence").once("value")
+  ]);
 
- const online=Object.values(users).filter(u=>u && u.online!==false);
+  const users=usersSnap.val()||{};
+  const presence=presenceSnap.val()||{};
+  const entries=Object.entries(users);
 
- if(!online.length){
-  list.innerHTML='<div style="color:#777;font-size:12px">No online users.</div>';
-  return;
+  list.innerHTML="";
+
+  if(!entries.length){
+   list.innerHTML='<div style="color:#777;font-size:12px">No players yet.</div>';
+   return;
+  }
+
+  entries.sort((a,b)=>(b[1]?.lastSeen||0)-(a[1]?.lastSeen||0));
+
+  entries.forEach(([uid,u])=>{
+   const row=document.createElement("div");
+   row.className="adminUser";
+
+   const isOnline=presence[uid]?.online===true;
+
+   row.innerHTML=`
+    <div class="adminUserInfo">
+     <div class="adminUserCode">${escapeHtml(u.code||"Unknown")}</div>
+     <div class="adminUserMeta">${isOnline?"Online":"Offline"} • ${escapeHtml(u.device||"Unknown")} • ${escapeHtml(u.country||"Unknown")}</div>
+    </div>
+    <div class="adminUserBtns">
+     <button data-action="more">More</button>
+     <button class="kick" data-action="kick">Kick</button>
+     <button class="ban" data-action="ban">Ban</button>
+    </div>
+   `;
+
+   row.querySelector('[data-action="more"]').onclick=()=>showUserDetails({...u,sessionId:uid});
+   row.querySelector('[data-action="kick"]').onclick=()=>adminKick(uid);
+   row.querySelector('[data-action="ban"]').onclick=()=>adminBan(uid);
+
+   list.appendChild(row);
+  });
+ }catch(err){
+  list.innerHTML='<div style="color:#a66;font-size:12px">Could not load players.</div>';
+  console.error(err);
  }
-
- online.forEach(u=>{
-  const row=document.createElement("div");
-  row.className="adminUser";
-
-  row.innerHTML=`
-   <div class="adminUserInfo">
-    <div class="adminUserCode">${escapeHtml(u.code||"Unknown")}</div>
-    <div class="adminUserMeta">${escapeHtml(u.device||"Unknown")} • ${escapeHtml(u.country||"Unknown")}</div>
-   </div>
-   <div class="adminUserBtns">
-    <button data-action="more">More</button>
-    <button class="kick" data-action="kick">Kick</button>
-    <button class="ban" data-action="ban">Ban</button>
-   </div>
-  `;
-
-  row.querySelector('[data-action="more"]').onclick=()=>showUserDetails(u);
-  row.querySelector('[data-action="kick"]').onclick=()=>adminKick(u.sessionId);
-  row.querySelector('[data-action="ban"]').onclick=()=>adminBan(u.sessionId);
-
-  list.appendChild(row);
- });
 }
 
 function showUserDetails(u){
@@ -832,20 +848,35 @@ async function generateOneTimeCode(){
 
  if(!firebaseIsAdmin)return;
 
- let code="";
+ const resultBox=$("adminCodeResult");
+ resultBox.style.display="block";
+ resultBox.textContent="Generating...";
 
- do{
-  code=Math.random().toString(36).slice(2,10).toUpperCase();
- }while((await db.ref("accessCodes/"+code).once("value")).exists());
+ try{
+  let code="";
 
- await db.ref("accessCodes/"+code).set({
-  used:false,
-  createdAt:Date.now(),
-  createdBy:firebaseUid
- });
+  for(let i=0;i<10;i++){
+   code=Math.random().toString(36).slice(2,10).toUpperCase();
+   const existing=await db.ref("accessCodes/"+code).once("value");
+   if(!existing.exists())break;
+  }
 
- $("adminCodeResult").textContent=code;
- $("adminCodeResult").style.display="block";
+  await db.ref("accessCodes/"+code).set({
+   used:false,
+   createdAt:Date.now(),
+   createdBy:firebaseUid
+  });
+
+  const check=await db.ref("accessCodes/"+code).once("value");
+  if(!check.exists()){
+   throw new Error("Code was not saved");
+  }
+
+  resultBox.textContent=code;
+ }catch(err){
+  console.error(err);
+  resultBox.textContent="Error: code could not be saved";
+ }
 }
 
 async function showBannedUsers(){
