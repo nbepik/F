@@ -4,121 +4,359 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Handwriting Studio</title>
+
 <style>
 :root{--a:#a855f7}
+
 *{box-sizing:border-box}
-body{margin:0;background:#090510;color:#eee;font-family:Arial,sans-serif}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+}
+
+body{
+ background:#090510;
+ color:#eee;
+ font-family:Arial,sans-serif;
+}
+
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 
+/* AUTH */
 #auth{
- position:fixed;inset:0;display:grid;place-items:center;
- background:radial-gradient(circle at center,#24103b,#090510 65%)
+ position:fixed;
+ inset:0;
+ display:grid;
+ place-items:center;
+ background:radial-gradient(circle at center,#24103b,#090510 65%);
 }
+
 #pass{
- width:250px;padding:13px 16px;border:1px solid #5b2b78;
- border-radius:12px;background:#160c20;color:white;outline:0;
- text-align:center
+ width:250px;
+ padding:13px 16px;
+ border:1px solid #5b2b78;
+ border-radius:12px;
+ background:#160c20;
+ color:white;
+ outline:0;
+ text-align:center;
 }
-#pass:focus{border-color:var(--a);box-shadow:0 0 20px #a855f733}
 
-#app{display:none;min-height:100vh;padding:16px}
+#pass:focus{
+ border-color:var(--a);
+ box-shadow:0 0 20px #a855f733;
+}
+
+/* APP */
+#app{
+ display:none;
+ width:100%;
+ height:100vh;
+ padding:10px;
+ overflow:hidden;
+}
+
 .top{
- width:min(1100px,100%);margin:auto;height:52px;
- display:flex;align-items:center;gap:8px
+ width:100%;
+ height:42px;
+ display:flex;
+ align-items:center;
+ gap:7px;
 }
+
 .tab,.gear{
- border:1px solid #392049;background:#160d20;color:#bbb;
- border-radius:10px;padding:9px 16px
+ border:1px solid #392049;
+ background:#160d20;
+ color:#bbb;
+ border-radius:9px;
+ padding:7px 14px;
 }
-.tab.active,.tab:hover,.gear:hover{border-color:var(--a);color:white}
-.gear{margin-left:auto;font-size:18px}
 
+.tab.active,.tab:hover,.gear:hover{
+ border-color:var(--a);
+ color:white;
+}
+
+.gear{
+ margin-left:auto;
+ font-size:17px;
+}
+
+/* MAIN */
 .page{
- width:min(1100px,100%);margin:10px auto;
- background:#100818;border:1px solid #2d193a;
- border-radius:16px;padding:14px;min-height:calc(100vh - 100px)
+ width:100%;
+ height:calc(100vh - 62px);
+ background:#100818;
+ border:1px solid #2d193a;
+ border-radius:14px;
+ padding:10px;
 }
 
-#generate{display:flex;gap:14px}
+/* GENERATOR */
+#generate{
+ display:flex;
+ gap:10px;
+ overflow:hidden;
+}
+
 .side{
- width:215px;flex:none;background:#140b1c;border:1px solid #2c1938;
- border-radius:12px;padding:13px
+ width:200px;
+ min-width:200px;
+ height:100%;
+ background:#140b1c;
+ border:1px solid #2c1938;
+ border-radius:11px;
+ padding:10px;
+ overflow:hidden;
 }
-.side label{display:block;font-size:12px;color:#999;margin:12px 0 5px}
-.side input,.side textarea,.side select{
- width:100%;background:#0c0711;color:white;
- border:1px solid #382044;border-radius:8px;padding:9px;outline:0
-}
-.side textarea{height:125px;resize:vertical}
-.side input:focus,.side textarea:focus,.side select:focus{border-color:var(--a)}
-.side button{width:100%;margin-top:9px;padding:9px;border-radius:8px;
- border:1px solid #452453;background:#1b0d27;color:#ddd}
-.side button:hover{border-color:var(--a)}
 
+.side label{
+ display:block;
+ font-size:11px;
+ color:#999;
+ margin:7px 0 4px;
+}
+
+.side input,
+.side textarea,
+.side select{
+ width:100%;
+ background:#0c0711;
+ color:white;
+ border:1px solid #382044;
+ border-radius:7px;
+ padding:7px;
+ outline:0;
+}
+
+.side textarea{
+ height:75px;
+ resize:none;
+}
+
+.side input:focus,
+.side textarea:focus,
+.side select:focus{
+ border-color:var(--a);
+}
+
+.side button{
+ width:100%;
+ margin-top:6px;
+ padding:7px;
+ border-radius:7px;
+ border:1px solid #452453;
+ background:#1b0d27;
+ color:#ddd;
+ font-size:12px;
+}
+
+.side button:hover{
+ border-color:var(--a);
+}
+
+/* A4 AREA */
 .sheetWrap{
- flex:1;display:flex;justify-content:center;align-items:flex-start;
- padding:4px;overflow:auto
+ flex:1;
+ min-width:0;
+ min-height:0;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ overflow:hidden;
 }
 
-/* A4: 210 × 297 */
 .sheet{
- width:min(100%,560px);
+ height:min(100%,calc((100vw - 250px)*1.414));
+ width:auto;
  aspect-ratio:210/297;
+ max-width:100%;
  background:white;
  box-shadow:0 8px 40px #000b;
- overflow:hidden
+ overflow:hidden;
 }
-#genCanvas{display:block;width:100%;height:100%}
 
-#studio{display:none;flex-direction:column;align-items:center}
+#genCanvas{
+ display:block;
+ width:100%;
+ height:100%;
+}
+
+/* STUDIO */
+#studio{
+ display:none;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ gap:8px;
+ overflow:hidden;
+}
+
 .studioHead{
- width:min(720px,100%);display:flex;align-items:center;
- justify-content:space-between;margin-bottom:10px
+ width:min(720px,100%);
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ flex:none;
 }
-.counter{color:#aaa;font-size:13px}
-.studioBtns{display:flex;gap:7px}
+
+.counter{
+ color:#aaa;
+ font-size:12px;
+}
+
+.studioBtns{
+ display:flex;
+ gap:5px;
+}
+
 .studioBtns button{
- background:#160c20;border:1px solid #382044;color:#ddd;
- padding:8px 13px;border-radius:8px
+ background:#160c20;
+ border:1px solid #382044;
+ color:#ddd;
+ padding:7px 11px;
+ border-radius:7px;
+ font-size:12px;
 }
-.studioBtns button:hover{border-color:var(--a)}
-.studioBtns button:disabled{opacity:.35;cursor:not-allowed}
+
+.studioBtns button:hover{
+ border-color:var(--a);
+}
+
+.studioBtns button:disabled{
+ opacity:.35;
+ cursor:not-allowed;
+}
 
 .drawWrap{
- width:min(650px,100%);
- background:#160d1e;border:1px solid #33203f;
- border-radius:14px;padding:12px
+ width:min(720px,100%);
+ max-height:calc(100% - 45px);
+ background:#160d1e;
+ border:1px solid #33203f;
+ border-radius:11px;
+ padding:8px;
+ overflow:hidden;
 }
+
 #drawCanvas{
- display:block;width:100%;height:auto;
- background:white;border-radius:7px;
- touch-action:none;cursor:crosshair
+ display:block;
+ width:100%;
+ height:auto;
+ max-height:100%;
+ background:white;
+ border-radius:6px;
+ touch-action:none;
+ cursor:crosshair;
 }
 
+/* SETTINGS */
 .settings{
- display:none;position:fixed;inset:0;background:#0009;
- align-items:center;justify-content:center;z-index:10
+ display:none;
+ position:fixed;
+ inset:0;
+ background:#0009;
+ align-items:center;
+ justify-content:center;
+ z-index:10;
 }
-.settingsBox{
- width:300px;background:#130a1b;border:1px solid #472454;
- border-radius:14px;padding:18px;box-shadow:0 15px 60px #000
-}
-.settingsTop{display:flex;justify-content:space-between;align-items:center}
-.close{
- border:0;background:none;color:#aaa;font-size:24px;cursor:pointer
-}
-.close:hover{color:white}
-.settings label{display:block;color:#aaa;font-size:12px;margin-top:18px}
-.settings input{width:100%;margin-top:7px}
 
-@media(max-width:700px){
- #app{padding:8px}
- .page{padding:9px}
- #generate{flex-direction:column}
- .side{width:100%}
- .sheet{width:min(100%,480px)}
- .studioHead{flex-wrap:wrap;gap:8px}
+.settingsBox{
+ width:280px;
+ background:#130a1b;
+ border:1px solid #472454;
+ border-radius:13px;
+ padding:16px;
+ box-shadow:0 15px 60px #000;
+}
+
+.settingsTop{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.close{
+ border:0;
+ background:none;
+ color:#aaa;
+ font-size:23px;
+ cursor:pointer;
+}
+
+.close:hover{color:white}
+
+.settings label{
+ display:block;
+ color:#aaa;
+ font-size:12px;
+ margin-top:16px;
+}
+
+.settings input{
+ width:100%;
+ margin-top:6px;
+}
+
+/* SMALL HEIGHT */
+@media(max-height:700px){
+ #app{padding:7px}
+ .top{height:36px}
+ .page{height:calc(100vh - 50px);padding:7px}
+ .side{width:180px;min-width:180px;padding:8px}
+ .side label{margin:4px 0 2px;font-size:10px}
+ .side input,.side textarea,.side select{padding:5px}
+ .side textarea{height:55px}
+ .side button{padding:5px;margin-top:4px;font-size:11px}
+ .tab,.gear{padding:5px 11px}
+}
+
+/* VERY SMALL WIDTH */
+@media(max-width:600px){
+ #generate{
+  flex-direction:column;
+ }
+ 
+ .side{
+  width:100%;
+  min-width:0;
+  height:auto;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:5px;
+  overflow:hidden;
+ }
+ 
+ .side label{
+  margin:2px 0;
+ }
+ 
+ .side textarea{
+  height:42px;
+ }
+ 
+ .side button{
+  margin:0;
+ }
+ 
+ .sheetWrap{
+  min-height:0;
+ }
+ 
+ .sheet{
+  height:100%;
+  max-height:100%;
+ }
+}
+
+/* TINY HEIGHT */
+@media(max-height:550px){
+ .side{
+  grid-template-columns:repeat(3,1fr);
+ }
 }
 </style>
 </head>
@@ -204,6 +442,7 @@ This is my handwriting.</textarea>
 
 <div class="settings" id="settings">
  <div class="settingsBox">
+
   <div class="settingsTop">
    <b>Settings</b>
    <button class="close" id="closeSettings">×</button>
@@ -211,6 +450,7 @@ This is my handwriting.</textarea>
 
   <label>Interface / Accent color</label>
   <input id="accent" type="color" value="#a855f7">
+
  </div>
 </div>
 
@@ -235,19 +475,24 @@ let strokes=[];
 let drawing=false;
 let activeStroke=null;
 
-/* ---------- AUTH ---------- */
-
 $("pass").addEventListener("keydown",e=>{
  if(e.key==="Enter"){
   if($("pass").value==="0000"){
    $("auth").style.display="none";
    $("app").style.display="block";
-   resizeGenerate();
-   resizeDraw();
-   render();
+   setTimeout(()=>{
+    resizeGenerate();
+    resizeDraw();
+    loadGlyph();
+    render();
+   },20);
   }else{
    $("pass").animate(
-    [{transform:"translateX(-7px)"},{transform:"translateX(7px)"},{transform:"translateX(0)"}],
+    [
+     {transform:"translateX(-7px)"},
+     {transform:"translateX(7px)"},
+     {transform:"translateX(0)"}
+    ],
     {duration:180}
    );
    $("pass").value="";
@@ -255,7 +500,7 @@ $("pass").addEventListener("keydown",e=>{
  }
 });
 
-/* ---------- TABS ---------- */
+/* TABS */
 
 function tab(which){
  $("generate").style.display=which==="generate"?"flex":"none";
@@ -264,23 +509,24 @@ function tab(which){
  $("genTab").classList.toggle("active",which==="generate");
  $("studioTab").classList.toggle("active",which==="studio");
 
- if(which==="generate"){
-  resizeGenerate();
-  render();
- }else{
-  setTimeout(()=>{
+ setTimeout(()=>{
+  if(which==="generate"){
+   resizeGenerate();
+   render();
+  }else{
    resizeDraw();
    drawStudio();
-  },30);
- }
+  }
+ },20);
 }
 
 $("genTab").onclick=()=>tab("generate");
 $("studioTab").onclick=()=>tab("studio");
 
-/* ---------- SETTINGS ---------- */
+/* SETTINGS */
 
 let accent=localStorage.getItem("hs_accent")||"#a855f7";
+
 document.documentElement.style.setProperty("--a",accent);
 $("accent").value=accent;
 
@@ -288,7 +534,8 @@ $("settingsBtn").onclick=()=>$("settings").style.display="flex";
 $("closeSettings").onclick=()=>$("settings").style.display="none";
 
 $("settings").onclick=e=>{
- if(e.target===$("settings")) $("settings").style.display="none";
+ if(e.target===$("settings"))
+  $("settings").style.display="none";
 };
 
 $("accent").oninput=e=>{
@@ -297,7 +544,7 @@ $("accent").oninput=e=>{
  localStorage.setItem("hs_accent",accent);
 };
 
-/* ---------- FONTS ---------- */
+/* FONTS */
 
 function saveFonts(){
  localStorage.setItem("hs_fonts",JSON.stringify(fonts));
@@ -306,6 +553,7 @@ function saveFonts(){
 
 function updateFontList(){
  $("fontSelect").innerHTML="";
+
  Object.keys(fonts).forEach(name=>{
   let o=document.createElement("option");
   o.value=name;
@@ -324,33 +572,47 @@ $("fontSelect").onchange=e=>{
 };
 
 $("newFont").onclick=()=>{
- let name=prompt("Font name:","My Font "+(Object.keys(fonts).length+1));
+ let name=prompt(
+  "Font name:",
+  "My Font "+(Object.keys(fonts).length+1)
+ );
+
  if(!name)return;
+
  name=name.trim();
+
  if(!name||fonts[name]){
   alert("That font already exists.");
   return;
  }
+
  fonts[name]={glyphs:{}};
  currentFont=name;
+ charIndex=0;
+
  saveFonts();
  updateFontList();
- charIndex=0;
  loadGlyph();
  render();
 };
 
 $("renameFont").onclick=()=>{
  let name=prompt("New font name:",currentFont);
+
  if(!name||name===currentFont)return;
+
  name=name.trim();
+
  if(!name||fonts[name]){
   alert("That font already exists.");
   return;
  }
+
  fonts[name]=fonts[currentFont];
  delete fonts[currentFont];
+
  currentFont=name;
+
  saveFonts();
  updateFontList();
  render();
@@ -358,15 +620,20 @@ $("renameFont").onclick=()=>{
 
 $("deleteFont").onclick=()=>{
  let names=Object.keys(fonts);
+
  if(names.length<=1){
   alert("You need at least one font.");
   return;
  }
+
  if(!confirm("Delete this font?"))return;
 
  delete fonts[currentFont];
+
  currentFont=Object.keys(fonts)[0];
+
  charIndex=0;
+
  saveFonts();
  updateFontList();
  loadGlyph();
@@ -375,19 +642,20 @@ $("deleteFont").onclick=()=>{
 
 updateFontList();
 
-/* ---------- GENERATOR SETTINGS ---------- */
+/* SETTINGS SAVE */
 
-const genSettings=[
+[
  ["fontSize",32],
  ["letterSpace",2],
  ["lineSpace",18],
  ["textColor","#111111"],
  ["paperColor","#ffffff"]
-];
+].forEach(([id,def])=>{
 
-genSettings.forEach(([id,def])=>{
  let saved=localStorage.getItem("hs_setting_"+id);
- if(saved!==null) $(id).value=saved;
+
+ if(saved!==null)
+  $(id).value=saved;
 
  $(id).addEventListener("input",()=>{
   localStorage.setItem("hs_setting_"+id,$(id).value);
@@ -397,68 +665,87 @@ genSettings.forEach(([id,def])=>{
 
 $("text").addEventListener("input",render);
 
-/* ---------- DRAWING ---------- */
+/* DRAWING */
 
 const dc=$("drawCanvas");
 const ctx=dc.getContext("2d");
 
 function resizeDraw(){
+
  let r=dc.getBoundingClientRect();
+
  if(!r.width)return;
 
+ let width=r.width;
+ let height=width*.5833;
  let dpr=Math.max(1,window.devicePixelRatio||1);
- dc.width=Math.round(r.width*dpr);
- dc.height=Math.round((r.width*.5833)*dpr);
+
+ dc.width=Math.round(width*dpr);
+ dc.height=Math.round(height*dpr);
 
  ctx.setTransform(dpr,0,0,dpr,0,0);
+
  drawStudio();
 }
 
 function pos(e){
+
  let r=dc.getBoundingClientRect();
- return {
+
+ return{
   x:(e.clientX-r.left)*(dc.clientWidth/r.width),
   y:(e.clientY-r.top)*(dc.clientHeight/r.height)
  };
 }
 
 dc.addEventListener("pointerdown",e=>{
+
  e.preventDefault();
+
  drawing=true;
 
- try{dc.setPointerCapture(e.pointerId)}catch{}
+ try{
+  dc.setPointerCapture(e.pointerId);
+ }catch{}
 
  let p=pos(e);
+
  activeStroke=[p];
  strokes.push(activeStroke);
+
  drawStudio();
 });
 
 dc.addEventListener("pointermove",e=>{
+
  if(!drawing)return;
+
  e.preventDefault();
 
- let p=pos(e);
- activeStroke.push(p);
+ activeStroke.push(pos(e));
+
  drawStudio();
 });
 
 function endDraw(e){
+
  drawing=false;
  activeStroke=null;
- try{dc.releasePointerCapture(e.pointerId)}catch{}
+
+ try{
+  dc.releasePointerCapture(e.pointerId);
+ }catch{}
 }
 
 dc.addEventListener("pointerup",endDraw);
 dc.addEventListener("pointercancel",endDraw);
-dc.addEventListener("pointerleave",e=>{
- if(drawing&&e.buttons===0)endDraw(e);
-});
 
 function line(points,color,width){
+
  if(!points.length)return;
 
  ctx.beginPath();
+
  ctx.lineCap="round";
  ctx.lineJoin="round";
  ctx.strokeStyle=color;
@@ -476,20 +763,27 @@ function line(points,color,width){
 }
 
 function guideChar(){
+
  let ch=chars[charIndex];
+
  let w=dc.clientWidth;
  let h=dc.clientHeight;
 
  ctx.save();
+
  ctx.font=`${Math.min(w,h)*.42}px Arial`;
  ctx.textAlign="center";
  ctx.textBaseline="middle";
+
  ctx.fillStyle="rgba(120,120,120,.22)";
+
  ctx.fillText(ch,w/2,h*.51);
+
  ctx.restore();
 }
 
 function drawStudio(){
+
  let w=dc.clientWidth;
  let h=dc.clientHeight;
 
@@ -500,25 +794,30 @@ function drawStudio(){
  ctx.fillStyle="#fff";
  ctx.fillRect(0,0,w,h);
 
- /* notebook lines */
+ /* RED NOTEBOOK LINES */
+
  ctx.lineWidth=2;
  ctx.strokeStyle="rgba(220,40,40,.35)";
 
  [.22,.42,.62,.82].forEach(y=>{
+
   ctx.beginPath();
   ctx.moveTo(0,h*y);
   ctx.lineTo(w,h*y);
   ctx.stroke();
+
  });
 
  guideChar();
 
- /* user's writing */
+ /* BLACK WRITING */
+
  for(const s of strokes)
   line(s,"#111",Math.max(3,w/170));
 }
 
 function saveGlyph(){
+
  let ch=chars[charIndex];
 
  fonts[currentFont].glyphs[ch]={
@@ -540,24 +839,36 @@ $("clear").onclick=()=>{
 
 $("back").onclick=()=>{
  if(charIndex<=0)return;
+
  saveGlyph();
+
  charIndex--;
+
  loadGlyph();
 };
 
 $("next").onclick=()=>{
  if(charIndex>=chars.length-1)return;
+
  saveGlyph();
+
  charIndex++;
+
  loadGlyph();
 };
 
 function loadGlyph(){
+
  let ch=chars[charIndex];
+
  let g=fonts[currentFont].glyphs[ch];
 
- strokes=g?.strokes?JSON.parse(JSON.stringify(g.strokes)):[];
- $("counter").textContent=`${charIndex+1} / ${chars.length}  •  "${ch}"`;
+ strokes=g?.strokes
+  ?JSON.parse(JSON.stringify(g.strokes))
+  :[];
+
+ $("counter").textContent=
+  `${charIndex+1} / ${chars.length}  •  "${ch}"`;
 
  $("back").disabled=charIndex===0;
  $("next").disabled=charIndex===chars.length-1;
@@ -565,63 +876,82 @@ function loadGlyph(){
  drawStudio();
 }
 
-/* ---------- GENERATION ---------- */
+/* GENERATOR */
 
 const gc=$("genCanvas");
 const gx=gc.getContext("2d");
 
 function resizeGenerate(){
+
  let r=gc.getBoundingClientRect();
- if(!r.width)return;
+
+ if(!r.width||!r.height)return;
 
  let dpr=2;
+
  gc.width=Math.round(r.width*dpr);
  gc.height=Math.round(r.height*dpr);
+
  gx.setTransform(dpr,0,0,dpr,0,0);
 }
 
 function drawGlyph(g,x,y,size,color){
- if(!g?.strokes?.length)return;
+
+ if(!g?.strokes?.length)return 0;
 
  let sx=size/100;
- let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+
+ let minX=Infinity;
+ let minY=Infinity;
+ let maxX=-Infinity;
+ let maxY=-Infinity;
 
  g.strokes.forEach(s=>s.forEach(p=>{
+
   minX=Math.min(minX,p.x);
   minY=Math.min(minY,p.y);
   maxX=Math.max(maxX,p.x);
   maxY=Math.max(maxY,p.y);
+
  }));
 
- if(!isFinite(minX))return;
+ if(!isFinite(minX))return 0;
 
  gx.save();
+
  gx.translate(x-minX*sx,y-minY*sx);
  gx.scale(sx,sx);
 
  g.strokes.forEach(s=>{
+
   gx.beginPath();
+
   gx.strokeStyle=color;
   gx.lineWidth=Math.max(2,(g.width||1200)/170);
   gx.lineCap="round";
   gx.lineJoin="round";
 
   s.forEach((p,i)=>{
+
    if(i)gx.lineTo(p.x,p.y);
    else gx.moveTo(p.x,p.y);
+
   });
 
   gx.stroke();
+
  });
 
  gx.restore();
 
- return (maxX-minX)*sx;
+ return(maxX-minX)*sx;
 }
 
 function render(){
+
  let w=gc.clientWidth;
  let h=gc.clientHeight;
+
  if(!w||!h)return;
 
  gx.clearRect(0,0,w,h);
@@ -629,41 +959,54 @@ function render(){
  gx.fillStyle=$("paperColor").value;
  gx.fillRect(0,0,w,h);
 
- let size=+($("fontSize").value||32);
- let letter=+($("letterSpace").value||0);
- let lineGap=+($("lineSpace").value||0);
+ let size=+$("fontSize").value||32;
+ let letter=+$("letterSpace").value||0;
+ let lineGap=+$("lineSpace").value||0;
 
  let text=$("text").value;
  let color=$("textColor").value;
 
  let left=35;
  let top=45;
- let maxW=w-70;
 
+ let maxW=w-70;
  let lineHeight=size+lineGap;
+
  let y=top;
 
  for(let row of text.split("\n")){
+
   let x=left;
 
   for(let ch of row){
+
    let g=fonts[currentFont].glyphs[ch];
 
    if(g){
-    let advance=drawGlyph(g,x,y,size,color);
+
+    let advance=drawGlyph(
+     g,x,y,size,color
+    );
+
     x+=advance+letter;
+
    }else{
+
     gx.save();
+
     gx.font=`${size}px Arial`;
     gx.fillStyle=color;
     gx.textBaseline="top";
+
     gx.fillText(ch,x,y);
+
     x+=gx.measureText(ch).width+letter;
+
     gx.restore();
    }
 
-   /* wrap automatically */
    if(x>maxW){
+
     x=left;
     y+=lineHeight;
    }
@@ -673,21 +1016,24 @@ function render(){
  }
 }
 
-/* ---------- EXPORT ---------- */
+/* EXPORT */
 
-function exportPNG(){
+$("pngBtn").onclick=()=>{
+
  let link=document.createElement("a");
+
  link.download="handwriting-A4.png";
  link.href=gc.toDataURL("image/png");
- link.click();
-}
 
-$("pngBtn").onclick=exportPNG;
+ link.click();
+};
 
 function printSheet(){
+
  let data=gc.toDataURL("image/png");
 
  let win=window.open("","_blank");
+
  if(!win)return;
 
  win.document.write(`
@@ -697,15 +1043,20 @@ function printSheet(){
  <title>Handwriting A4</title>
  <style>
  @page{size:A4;margin:0}
- *{box-sizing:border-box}
- html,body{margin:0;padding:0;background:white}
- img{width:210mm;height:297mm;display:block}
+ html,body{margin:0;padding:0}
+ img{
+  width:210mm;
+  height:297mm;
+  display:block;
+ }
  </style>
  </head>
  <body>
  <img src="${data}">
  <script>
- window.onload=()=>setTimeout(()=>window.print(),300);
+ window.onload=()=>{
+  setTimeout(()=>window.print(),300)
+ };
  <\/script>
  </body>
  </html>
@@ -717,17 +1068,20 @@ function printSheet(){
 $("pdfBtn").onclick=printSheet;
 $("goodBtn").onclick=printSheet;
 
-/* ---------- WINDOW ---------- */
+/* RESIZE */
 
 window.addEventListener("resize",()=>{
- if($("studio").style.display!=="none")resizeDraw();
- else resizeGenerate();
+
+ if($("studio").style.display!=="none"){
+  resizeDraw();
+ }else{
+  resizeGenerate();
+ }
+
  render();
 });
 
 loadGlyph();
-resizeGenerate();
-render();
 </script>
 
 </body>
