@@ -1,1420 +1,667 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!--
-  Firebase database: aschapha228
-  IMPORTANT: This client-only version is functional, but the literal 55555 and
-  3ed43ef3 cannot be made cryptographically secret inside an HTML file.
-  For strong server-side protection, move code validation to Cloud Functions.
--->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ascapha bypass</title>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
-<!-- ВСТРОЕННЫЙ ADBLOCKER ДЛЯ САЙТА И IFRAME -->
-<script>
-  (function() {
-    const adDomains = [
-      'googleads', 'googlesyndication', 'doubleclick.net', 'adnxs.com',
-      'popads.net', 'popcash.net', 'adform.net', 'adroll.com', 'outbrain.com',
-      'taboola.com', 'zeronetwork', 'adsterra', 'exoclick'
-    ];
-
-    function isAdUrl(url) {
-      if (!url) return false;
-      return adDomains.some(domain => url.includes(domain));
-    }
-
-    // Блокировка XHR
-    const origOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(method, url) {
-      if (isAdUrl(url)) {
-        console.log('[AdBlocker] Blocked XHR:', url);
-        return;
-      }
-      return origOpen.apply(this, arguments);
-    };
-
-    // Блокировка Fetch
-    const origFetch = window.fetch;
-    window.fetch = function(resource, init) {
-      const url = typeof resource === 'string' ? resource : resource.url;
-      if (isAdUrl(url)) {
-        console.log('[AdBlocker] Blocked Fetch:', url);
-        return Promise.reject(new Error('Blocked by internal AdBlocker'));
-      }
-      return origFetch.apply(this, arguments);
-    };
-
-    // Удаление рекламных элементов из DOM
-    const adSelectors = '[id*="aria-ad"], [class*="ad-box"], [class*="banner-ad"], iframe[src*="doubleclick"], iframe[src*="googleads"]';
-    setInterval(() => {
-      document.querySelectorAll(adSelectors).forEach(el => el.remove());
-    }, 1500);
-  })();
-</script>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Handwriting Studio</title>
 <style>
-  :root {
-    --bg-color: #07040d;
-    --card-bg: rgba(20, 10, 35, 0.75);
-    --border-glow: #a855f7;
-    --border-active: #e0aaff;
-    --text-main: #ffffff;
-    --text-muted: #c084fc;
-    --neon-shadow: rgba(168, 85, 247, 0.4);
-    --strong-glow: rgba(192, 132, 252, 0.8);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    min-height: 100vh;
-    background: radial-gradient(circle at top center, #1e0533 0%, var(--bg-color) 70%);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
-  }
-  #bgContainer {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  #bgImageElement {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform-origin: center center;
-    transition: transform 0.1s ease-out;
-  }
-  #authOverlay {
-    position: fixed; inset: 0;
-    background: rgba(7, 4, 13, 0.95);
-    backdrop-filter: blur(15px);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
-  }
-  .auth-box {
-    background: var(--card-bg);
-    border: 2px solid var(--border-glow);
-    padding: 40px 30px;
-    border-radius: 20px;
-    box-shadow: 0 0 25px var(--neon-shadow), inset 0 0 15px var(--neon-shadow);
-    text-align: center;
-    max-width: 360px; width: 90%;
-  }
-  .auth-box h2 { font-size: 1.8rem; margin-bottom: 8px; text-shadow: 0 0 10px var(--border-glow); }
-  .auth-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
-  .auth-input {
-    width: 100%; padding: 12px 15px; border-radius: 10px;
-    border: 1px solid var(--border-glow); background: rgba(0,0,0,0.6);
-    color: #fff; font-size: 1rem; outline: none; text-align: center;
-    letter-spacing: 2px; margin-bottom: 15px; transition: 0.3s;
-  }
-  .auth-input:focus { border-color: var(--border-active); box-shadow: 0 0 15px var(--strong-glow); }
-  .auth-btn {
-    width: 100%; padding: 12px; border-radius: 10px; border: none;
-    background: linear-gradient(135deg, var(--border-glow), var(--border-active));
-    color: #fff; font-size: 1rem; font-weight: bold; cursor: pointer;
-    box-shadow: 0 0 15px var(--neon-shadow); transition: 0.3s;
-  }
-  .auth-btn:hover { box-shadow: 0 0 25px var(--strong-glow); transform: translateY(-2px); }
-  #errorMsg { color: #ff4d4d; font-size: 0.85rem; margin-top: 10px; display: none; }
-  #appContent { display: none; width: 100%; max-width: 1300px; padding: 40px 20px; }
-  header { text-align: center; margin-bottom: 30px; }
-  h1 {
-    font-size: 3rem; font-weight: 900; letter-spacing: 1px; color: #fff;
-    text-shadow: 0 0 10px var(--border-glow), 0 0 30px var(--border-glow); margin-bottom: 5px;
-  }
-  .subtitle { color: var(--text-muted); font-size: 1.1rem; letter-spacing: 0.5px; margin-bottom: 25px; }
+:root{
+  --accent:#a855f7;
+  --bg:#09070d;
+  --panel:#111018;
+  --panel2:#17141f;
+  --line:#292432;
+  --text:#f5f3f7;
+  --muted:#9d96aa;
+  --paper:#fff;
+  --red:#e56b6f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{height:100%;display:flex;flex-direction:column}
+.topbar{
+  height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;border-bottom:1px solid var(--line);background:#0c0a11;
+}
+.logo{font-weight:800;letter-spacing:.5px;font-size:18px}
+.logo span{color:var(--accent)}
+.tabs{display:flex;gap:5px;position:absolute;left:50%;transform:translateX(-50%)}
+.tab{
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  padding:9px 20px;border-radius:10px;font-weight:700
+}
+.tab.active{color:white;background:var(--panel2);border-color:var(--line)}
+.top-actions{display:flex;gap:8px}
+.icon-btn{
+  border:1px solid var(--line);background:var(--panel);color:white;
+  width:38px;height:38px;border-radius:9px
+}
+.main{flex:1;min-height:0;position:relative}
+.view{display:none;width:100%;height:100%}
+.view.active{display:flex}
 
-  /* ПАНЕЛЬ ПОИСКА И ПЕРЕКЛЮЧАТЕЛЯ */
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    max-width: 800px;
-    margin: 0 auto 35px;
-  }
-  .search-box {
-    flex: 1;
-    position: relative;
-  }
-  #searchInput {
-    width: 100%;
-    padding: 14px 20px 14px 48px;
-    border-radius: 14px;
-    border: 1px solid var(--border-glow);
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-    font-size: 1rem;
-    outline: none;
-    transition: 0.3s;
-  }
-  #searchInput:focus {
-    box-shadow: 0 0 20px var(--neon-shadow);
-    border-color: var(--border-active);
-  }
-  .search-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.2rem;
-    opacity: 0.7;
-  }
-  .view-switch {
-    display: flex;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 4px;
-    border-radius: 12px;
-    border: 1px solid var(--border-glow);
-  }
-  .tab-btn {
-    padding: 10px 20px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: bold;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: 0.3s;
-  }
-  .tab-btn.active {
-    background: linear-gradient(135deg, var(--border-glow), var(--border-active));
-    color: #fff;
-    box-shadow: 0 0 12px var(--neon-shadow);
-  }
+/* GENERATE */
+.generate-view{height:100%;overflow:hidden}
+.sidebar{
+  width:285px;flex:0 0 285px;border-right:1px solid var(--line);
+  background:#0d0b12;padding:20px;overflow:auto
+}
+.sidebar h2{margin:0 0 18px;font-size:18px}
+.group{margin-bottom:20px}
+.group label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+.control{
+  width:100%;background:var(--panel);border:1px solid var(--line);color:white;
+  border-radius:9px;padding:10px
+}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.check{display:flex;align-items:center;gap:8px;color:#ddd;font-size:13px}
+.primary{
+  width:100%;border:0;border-radius:9px;padding:11px;background:var(--accent);
+  color:white;font-weight:800
+}
+.secondary{
+  width:100%;border:1px solid var(--line);border-radius:9px;padding:10px;
+  background:var(--panel);color:white
+}
+.paper-area{
+  flex:1;min-width:0;display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow:auto;background:#0a080e
+}
+.paper{
+  width:min(65vh,650px);aspect-ratio:210/297;background:white;color:#111;
+  box-shadow:0 18px 60px #0008;position:relative;overflow:hidden;
+  padding:50px 58px
+}
+.paper h1{font-size:28px;margin:0 0 10px}
+.paper .sample{
+  font-size:25px;line-height:1.8;word-break:break-word;
+  font-family:var(--generated-font,Arial)
+}
+.paper .sample-small{font-size:17px;line-height:1.7;margin-top:20px}
+.paper-footer{position:absolute;bottom:25px;left:58px;right:58px;color:#888;font-size:11px}
 
-  .games {
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-    gap: 18px;
-  }
-  .card {
-    background: var(--card-bg); 
-    border: 1px solid var(--border-glow);
-    border-radius: 16px; 
-    color: var(--text-main);
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    padding: 22px 12px;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    min-height: 80px;
-  }
-  .card:hover {
-    transform: translateY(-6px);
-    border-color: var(--border-active);
-    box-shadow: 0 0 20px var(--neon-shadow);
-    background: var(--neon-shadow);
-  }
-  .card.hidden { display: none; }
-  .name {
-    font-weight: 700;
-    font-size: 0.95rem;
-    line-height: 1.3;
-  }
+/* STUDIO */
+.studio-view{position:relative;height:100%;overflow:hidden}
+.studio-toolbar{
+  width:260px;flex:0 0 260px;border-right:1px solid var(--line);
+  background:#0d0b12;padding:18px;overflow:auto
+}
+.studio-toolbar h2{margin:0 0 4px}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.char-box{
+  margin:18px 0;padding:14px;border:1px solid var(--line);
+  background:var(--panel);border-radius:12px;text-align:center
+}
+.char{
+  height:85px;display:flex;align-items:center;justify-content:center;
+  font-size:65px;font-weight:300;color:#777
+}
+.progress{height:5px;background:#28232e;border-radius:99px;overflow:hidden;margin-top:12px}
+.progress>div{height:100%;background:var(--accent);width:0}
+.studio-actions{display:flex;gap:7px;margin-top:12px}
+.studio-actions button{flex:1}
+.canvas-wrap{
+  flex:1;min-width:0;display:flex;align-items:center;justify-content:center;
+  background:#d9d9dc;position:relative;overflow:hidden
+}
+.canvas-page{
+  position:relative;background:#fff;
+  width:min(78vw,850px);height:min(78vh,700px);
+  box-shadow:0 12px 45px #0007;border-radius:2px;
+}
+#drawCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.guide{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to bottom,
+      transparent 24.7%,var(--red) 24.7%,var(--red) 25%,transparent 25%,
+      transparent 49.7%,var(--red) 49.7%,var(--red) 50%,transparent 50%,
+      transparent 74.7%,var(--red) 74.7%,var(--red) 75%,transparent 75%);
+  opacity:.42
+}
+.guide-char{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  text-align:center;font-size:min(28vw,300px);font-weight:300;color:#aaa;
+  opacity:.35;line-height:1
+}
 
-  /* СТИЛИ ДЛЯ ВЫВОДА СПЛОШНОГО СПИСКА LUMIN */
-  #games {
-    width: 100%;
-    min-height: 500px;
-  }
-  #games .pagination, #games .page-navigation, #games [class*="pagination"] {
-    display: none !important; /* Отключаем страницы */
-  }
-
-  #gameModal {
-    position: fixed; inset: 0;
-    background: rgba(7, 4, 13, 0.75);
-    backdrop-filter: blur(18px);
-    display: none; justify-content: center; align-items: center;
-    z-index: 2000;
-  }
-  #gameModal.open { display: flex; }
-  .game-modal-box {
-    width: 95vw; height: 90vh; max-width: 1400px;
-    background: #0d0618;
-    border: 2px solid var(--border-glow);
-    border-radius: 18px;
-    box-shadow: 0 0 50px var(--neon-shadow);
-    overflow: hidden; position: relative;
-    display: flex; flex-direction: column;
-  }
-  .game-modal-header {
-    padding: 12px 18px;
-    background: linear-gradient(90deg, var(--neon-shadow), rgba(255, 255, 255, 0.05));
-    display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--border-glow);
-  }
-  .game-modal-title { font-weight: 700; font-size: 1.1rem; text-shadow: 0 0 8px var(--border-glow); }
-  #closeGameBtn {
-    background: transparent; border: 1px solid #ff6b6b; color: #ff6b6b;
-    width: 38px; height: 38px; border-radius: 10px; font-size: 20px;
-    cursor: pointer; transition: 0.25s;
-  }
-  #closeGameBtn:hover {
-    background: rgba(255, 107, 107, 0.2);
-    box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
-  }
-  #gameFrame { flex: 1; width: 100%; border: none; background: #000; }
-  
-  #bottomCloseGameContainer {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2100;
-    display: none;
-  }
-  #bottomCloseGameContainer.open { display: block; }
-  .bottom-exit-btn {
-    padding: 10px 24px;
-    border-radius: 12px;
-    border: 2px solid var(--border-glow);
-    background: rgba(15, 8, 28, 0.9);
-    color: var(--text-main);
-    font-size: 0.95rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 0 20px var(--neon-shadow);
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
-  }
-  .bottom-exit-btn:hover {
-    background: var(--border-glow);
-    color: #fff;
-    box-shadow: 0 0 30px var(--strong-glow);
-    transform: translateY(-2px);
-  }
-
-  .bottom-left-controls {
-    position: fixed; bottom: 28px; left: 28px;
-    display: flex; gap: 10px; z-index: 900;
-  }
-  .control-btn {
-    width: 50px; height: 50px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--border-glow), var(--border-active));
-    border: 2px solid var(--border-active);
-    box-shadow: 0 0 20px var(--neon-shadow);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s ease; font-size: 22px;
-  }
-  .control-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--strong-glow); }
-  #adminBtn { display: none; background: linear-gradient(135deg, #b91c1c, #ef4444); border-color: #fca5a5; }
-
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(7, 4, 13, 0.85); backdrop-filter: blur(14px);
-    display: none; justify-content: center; align-items: center; z-index: 3000;
-  }
-  .modal-overlay.show { display: flex; }
-  .gs-box {
-    background: var(--card-bg); border: 2px solid var(--border-glow);
-    padding: 30px; border-radius: 20px; box-shadow: 0 0 40px var(--neon-shadow);
-    width: 440px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
-  }
-  .gs-box h3 { margin-bottom: 15px; text-shadow: 0 0 10px var(--border-glow); font-size: 1.4rem; text-align: center; }
-  .gs-row { margin-bottom: 14px; }
-  .gs-row label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px; }
-  .gs-row input, .gs-row select {
-    width: 100%; padding: 10px 12px; border-radius: 10px;
-    border: 1px solid var(--border-glow); background: rgba(0,0,0,0.6); color: #fff; outline: none; font-size: 0.95rem;
-  }
-  .gs-actions { display: flex; gap: 10px; margin-top: 20px; }
-  .gs-actions button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-  .gs-save { background: linear-gradient(135deg, var(--border-glow), var(--border-active)); color: #fff; box-shadow: 0 0 10px var(--neon-shadow); }
-  .gs-close { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--border-glow); }
-
-  .user-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  .user-item:last-child { border-bottom: none; }
-  .user-kick-btn {
-    background: #ef4444; color: #fff; border: none; padding: 4px 8px;
-    border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;
-    transition: 0.2s;
-  }
-  .user-kick-btn:hover { background: #dc2626; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
-
-  #chatToggle {
-    position: fixed; bottom: 28px; right: 28px;
-    width: 64px; height: 64px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--border-glow), var(--border-active));
-    border: 2px solid var(--border-active);
-    box-shadow: 0 0 25px var(--neon-shadow), 0 0 40px var(--neon-shadow);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    z-index: 900; transition: all 0.3s ease; font-size: 28px;
-  }
-  #chatToggle:hover { transform: scale(1.1); box-shadow: 0 0 35px var(--strong-glow); }
-  #chatPanel {
-    position: fixed; bottom: 110px; right: 28px;
-    width: 380px; max-width: calc(100vw - 40px);
-    height: 520px; max-height: calc(100vh - 140px);
-    background: rgba(15, 8, 28, 0.95);
-    border: 2px solid var(--border-glow); border-radius: 20px;
-    box-shadow: 0 0 40px var(--neon-shadow), inset 0 0 20px var(--neon-shadow);
-    display: none; flex-direction: column; z-index: 950; overflow: hidden;
-    backdrop-filter: blur(12px);
-  }
-  #chatPanel.open { display: flex; }
-  .chat-header {
-    padding: 16px 18px;
-    background: linear-gradient(90deg, var(--neon-shadow), rgba(255, 255, 255, 0.05));
-    border-bottom: 1px solid var(--border-glow);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .chat-header h3 { font-size: 1.15rem; text-shadow: 0 0 10px var(--border-glow); }
-  .chat-header-btns { display: flex; gap: 10px; }
-  .chat-icon-btn {
-    background: transparent; border: 1px solid var(--border-glow);
-    color: var(--text-muted); width: 34px; height: 34px; border-radius: 8px;
-    cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
-    transition: 0.25s;
-  }
-  .chat-icon-btn:hover {
-    background: var(--neon-shadow); color: #fff; box-shadow: 0 0 12px var(--neon-shadow);
-  }
-  #messagesArea {
-    flex: 1; overflow-y: auto; padding: 16px;
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  #messagesArea::-webkit-scrollbar { width: 6px; }
-  #messagesArea::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 3px; }
-  .message {
-    background: rgba(30, 15, 50, 0.7);
-    border: 1px solid var(--border-glow);
-    border-radius: 14px; padding: 10px 14px; position: relative;
-    animation: fadeIn 0.3s ease;
-  }
-  .message.own {
-    background: var(--neon-shadow);
-    border-color: var(--border-active);
-  }
-  .msg-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.78rem; }
-  .msg-nick { color: var(--border-active); font-weight: 700; }
-  .msg-time { color: var(--text-muted); opacity: 0.8; }
-  .msg-text { font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
-  .msg-delete {
-    position: absolute; top: 8px; right: 10px;
-    background: transparent; border: none; color: #ff6b6b;
-    cursor: pointer; font-size: 14px; opacity: 0.6; transition: 0.2s;
-  }
-  .msg-delete:hover { opacity: 1; }
-  .chat-input-area {
-    padding: 14px; border-top: 1px solid var(--border-glow);
-    display: flex; gap: 10px;
-  }
-  #chatInput {
-    flex: 1; padding: 12px 14px; border-radius: 12px;
-    border: 1px solid var(--border-glow); background: rgba(0,0,0,0.5);
-    color: #fff; font-size: 0.95rem; outline: none;
-  }
-  #chatInput:focus { box-shadow: 0 0 12px var(--neon-shadow); }
-  #sendBtn {
-    padding: 0 18px; border-radius: 12px; border: none;
-    background: linear-gradient(135deg, var(--border-glow), var(--border-active));
-    color: #fff; font-weight: bold; cursor: pointer; transition: 0.25s;
-  }
-  #sendBtn:hover { box-shadow: 0 0 15px var(--strong-glow); }
-  #nickModal {
-    position: fixed; inset: 0;
-    background: rgba(7, 4, 13, 0.92); backdrop-filter: blur(10px);
-    display: none; justify-content: center; align-items: center; z-index: 1100;
-  }
-  #nickModal.show { display: flex; }
-  .nick-box {
-    background: var(--card-bg); border: 2px solid var(--border-glow);
-    padding: 32px 28px; border-radius: 18px;
-    box-shadow: 0 0 30px var(--neon-shadow); text-align: center;
-    width: 320px; max-width: 90%;
-  }
-  .nick-box h3 { margin-bottom: 8px; text-shadow: 0 0 10px var(--border-glow); }
-  .nick-box p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px; }
-  #settingsPanel {
-    position: absolute; inset: 0;
-    background: rgba(12, 6, 24, 0.97);
-    display: none; flex-direction: column; padding: 20px; z-index: 10;
-  }
-  #settingsPanel.show { display: flex; }
-  .settings-title { font-size: 1.2rem; margin-bottom: 20px; text-shadow: 0 0 8px var(--border-glow); }
-  .settings-row { margin-bottom: 16px; }
-  .settings-row label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; }
-  .settings-row input {
-    width: 100%; padding: 11px 14px; border-radius: 10px;
-    border: 1px solid var(--border-glow); background: rgba(0,0,0,0.5); color: #fff; outline: none;
-  }
-  .settings-actions { margin-top: auto; display: flex; gap: 10px; }
-  .settings-actions button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-  #saveNickBtn { background: linear-gradient(135deg, var(--border-glow), var(--border-active)); color: #fff; }
-  #closeSettingsBtn { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--border-glow); }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (max-width: 600px) {
-    .toolbar { flex-direction: column; }
-    .search-box, .view-switch { width: 100%; }
-    .view-switch { justify-content: center; }
-    #chatPanel { right: 10px; left: 10px; width: auto; bottom: 100px; }
-    #chatToggle { right: 18px; bottom: 18px; }
-  }
+/* MODALS */
+.overlay{
+  position:fixed;inset:0;background:#000b;display:flex;align-items:center;
+  justify-content:center;z-index:50
+}
+.auth{
+  width:min(390px,90vw);padding:28px;border:1px solid var(--accent);
+  border-radius:15px;background:#0f0c15;box-shadow:0 0 35px #a855f744
+}
+.auth h2{margin:0 0 7px}
+.auth p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.auth input{width:100%;padding:12px;border-radius:9px;border:1px solid #38313f;background:#17131e;color:white}
+.auth button{margin-top:10px;width:100%;padding:12px;border:0;border-radius:9px;background:var(--accent);color:white;font-weight:800}
+#error{color:#f87171;font-size:12px;min-height:17px;margin-top:9px}
+.modal-card{
+  width:min(520px,92vw);max-height:85vh;overflow:auto;background:#111018;
+  border:1px solid var(--line);border-radius:14px;padding:20px
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{margin:0}
+.close{border:1px solid var(--line);background:var(--panel);color:white;border-radius:8px;padding:7px 11px}
+.admin-list{display:flex;flex-direction:column;gap:8px;margin-top:15px}
+.user{
+  border:1px solid var(--line);background:var(--panel);padding:10px;border-radius:9px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px
+}
+.user-code{font-weight:700;font-size:13px;word-break:break-all}
+.user-actions{display:flex;gap:5px}
+.user-actions button{border:0;border-radius:7px;padding:7px 9px;color:white;background:#5b21b6;font-size:11px}
+.user-actions .kick{background:#92400e}
+.user-actions .ban{background:#991b1b}
+.code-result{
+  padding:14px;background:#0a080e;border:1px dashed var(--accent);
+  border-radius:10px;font-size:24px;font-weight:800;letter-spacing:2px;text-align:center;
+  margin:14px 0
+}
 </style>
 </head>
 <body>
-<div id="bgContainer">
-  <img id="bgImageElement" style="display: none;" alt="Background">
-</div>
 
-<div id="authOverlay">
-  <div class="auth-box">
-    <h2>RESTRICTED ACCESS</h2>
-    <p>Enter the master key to continue</p>
-    <input type="password" id="passInput" class="auth-input" placeholder="••••••••" onkeydown="checkEnter(event)">
-    <button class="auth-btn" onclick="authenticate()">UNLOCK</button>
-    <div id="errorMsg">Incorrect password! Try again.</div>
+<div id="authOverlay" class="overlay">
+  <div class="auth">
+    <h2>Handwriting Studio</h2>
+    <p>Enter your access code to continue.</p>
+    <input id="accessInput" type="password" placeholder="Access code" autocomplete="off">
+    <button id="unlockBtn">Continue</button>
+    <div id="error"></div>
   </div>
 </div>
 
-<div id="appContent">
-  <header>
-    <h1>sehr tuffe spiele</h1>
-    <div class="subtitle"></div>
+<div class="app" id="app" style="display:none">
+  <header class="topbar">
+    <div class="logo">Handwriting <span>Studio</span></div>
+    <div class="tabs">
+      <button class="tab active" data-view="studio">Studio</button>
+      <button class="tab" data-view="generate">Generate</button>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="adminBtn" title="Admin" style="display:none">⚙</button>
+      <button class="icon-btn" id="settingsBtn" title="Settings">☰</button>
+    </div>
   </header>
 
-  <div class="toolbar">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search games...">
-    </div>
-    <div class="view-switch">
-      <button class="tab-btn active" id="tabBasic" onclick="switchView('basic')">Basic</button>
-      <button class="tab-btn" id="tabLumin" onclick="switchView('lumin')">Lumin</button>
-    </div>
-  </div>
+  <main class="main">
+    <section class="view studio-view active" id="studioView">
+      <aside class="studio-toolbar">
+        <h2>Studio</h2>
+        <div class="small">Write each character naturally. Your characters stay saved in this browser.</div>
 
-  <!-- BASIC ИГРЫ -->
-  <div class="games" id="gamesGrid">
-    <div class="card" data-url="https://spacewaves2.io" data-name="space waves"><div class="name">Space Waves</div></div>
-    <div class="card" data-url="https://blockblast.game/" data-name="block blast"><div class="name">Block Blast</div></div>
-    <div class="card" data-url="https://www.miniplay.com/game/aquapark-io" data-name="aquapark"><div class="name">Aquapark.io</div></div>
-    <div class="card" data-url="https://manrunner2048.io/" data-name="runner 2048"><div class="name">Runner 2048</div></div>
-    <div class="card" data-url="https://www.miniplay.com/game/noob-snake-2048" data-name="noob snake"><div class="name">Noob Snake 2048</div></div>
-    <div class="card" data-url="https://www.worldguessr.com/de" data-name="worldguessr"><div class="name">WorldGuessr</div></div>
-    <div class="card" data-url="https://thiefpuzzle.io/" data-name="thief puzzle"><div class="name">Thief Puzzle</div></div>
-    <div class="card" data-url="https://ozogames.com/game/poxel-io/" data-name="poxel"><div class="name">Poxel.io</div></div>
-    <div class="card" data-url="https://ozgames.io/#ffa" data-name="ozgames"><div class="name">Ozgames</div></div>
-    <div class="card" data-url="https://doppel.fit" data-name="doppel"><div class="name">Doppel.fit</div></div>
-    <div class="card" data-url="2048.html" data-name="2048"><div class="name">2048</div></div>
-    <div class="card" data-url="amongus.html" data-name="among us"><div class="name">Among Us</div></div>
-    <div class="card" data-url="bad-piggies.html" data-name="bad piggies"><div class="name">Bad Piggies</div></div>
-    <div class="card" data-url="boxing-random.html" data-name="boxing random"><div class="name">Boxing Random</div></div>
-    <div class="card" data-url="cell-machine.html" data-name="cell machine"><div class="name">Cell Machine</div></div>
-    <div class="card" data-url="cheeserolling.html" data-name="cheese rolling"><div class="name">Cheese Rolling</div></div>
-    <div class="card" data-url="cluster-rush.html" data-name="cluster rush"><div class="name">Cluster Rush</div></div>
-    <div class="card" data-url="cookie-clicker.html" data-name="cookie clicker"><div class="name">Cookie Clicker</div></div>
-    <div class="card" data-url="cut-the-rope.html" data-name="cut the rope"><div class="name">Cut the Rope</div></div>
-    <div class="card" data-url="drift-hunters.html" data-name="drift hunters"><div class="name">Drift Hunters</div></div>
-    <div class="card" data-url="geomtrydash.html" data-name="geometry dash"><div class="name">Geometry Dash</div></div>
-    <div class="card" data-url="motox3m.html" data-name="moto x3m"><div class="name">Moto X3M</div></div>
-    <div class="card" data-url="rooftop-snipers.html" data-name="rooftop snipers"><div class="name">Rooftop Snipers</div></div>
-    <div class="card" data-url="rooftop-snipers2.html" data-name="rooftop snipers 2"><div class="name">Rooftop Snipers 2</div></div>
-    <div class="card" data-url="subway-surfers.html" data-name="subway surfers"><div class="name">Subway Surfers</div></div>
-    <div class="card" data-url="thepasswordgame.html" data-name="password game"><div class="name">The Password Game</div></div>
-    <div class="card" data-url="untitledgoosegame.html" data-name="untitled goose"><div class="name">Untitled Goose Game</div></div>
-    <div class="card" data-url="webecomewhatwebehold.html" data-name="we become what we behold"><div class="name">We Become What We Behold</div></div>
-    <div class="card" data-url="spacebarclicker.html" data-name="spacebar clicker"><div class="name">Spacebar Clicker</div></div>
-    <div class="card" data-url="sandtris.html" data-name="sandtris"><div class="name">Sandtris</div></div>
-    <div class="card" data-url="bitlife.html" data-name="bitlife"><div class="name">BitLife</div></div>
-    <div class="card" data-url="bouncy-basketball.html" data-name="bouncy basketball"><div class="name">Bouncy Basketball</div></div>
-    <div class="card" data-url="breaking-the-bank.html" data-name="breaking the bank"><div class="name">Breaking the Bank</div></div>
-    <div class="card" data-url="monkey-mart.html" data-name="monkey mart"><div class="name">Monkey Mart</div></div>
-    <div class="card" data-url="getaway-shootout.html" data-name="getaway shootout"><div class="name">Getaway Shootout</div></div>
-    <div class="card" data-url="escroadcity2.html" data-name="escape road city"><div class="name">Escape Road City 2</div></div>
-    <div class="card" data-url="drive-mad.html" data-name="drive mad"><div class="name">Drive Mad</div></div>
-    <div class="card" data-url="monster-tracks.html" data-name="monster tracks"><div class="name">Monster Tracks</div></div>
-    <div class="card" data-url="rocketgoal.html" data-name="rocket goal"><div class="name">Rocket Goal</div></div>
-    <div class="card" data-url="stickman-hook.html" data-name="stickman hook"><div class="name">Stickman Hook</div></div>
-    <div class="card" data-url="soccer-random.html" data-name="soccer random"><div class="name">Soccer Random</div></div>
-    <div class="card" data-url="drift-boss.html" data-name="drift boss"><div class="name">Drift Boss</div></div>
-    <div class="card" data-url="eaglercraft.html" data-name="minecraft eaglercraft"><div class="name">Minecraft</div></div>
-    <div class="card" data-url="doom.html" data-name="doom"><div class="name">Doom</div></div>
-  </div>
+        <div class="char-box">
+          <div class="char" id="guideChar">A</div>
+          <div class="small" id="charCounter">1 / 76</div>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
 
-  <!-- LUMIN БИБЛИОТЕКА ИГР -->
-  <div id="games" style="display: none;"></div>
+        <div class="group">
+          <label>Character set</label>
+          <select class="control" id="charset">
+            <option value="en">English + German</option>
+          </select>
+        </div>
+
+        <div class="studio-actions">
+          <button class="secondary" id="backChar">Back</button>
+          <button class="primary" id="nextChar">Next</button>
+        </div>
+
+        <div class="group" style="margin-top:20px">
+          <button class="secondary" id="clearChar">Clear</button>
+        </div>
+
+        <div class="group">
+          <label>Line spacing</label>
+          <input id="lineSpacing" type="range" min="30" max="100" value="50" style="width:100%">
+        </div>
+
+        <div class="group">
+          <button class="primary" id="finishStudio">Finish / Save Font</button>
+        </div>
+      </aside>
+
+      <div class="canvas-wrap">
+        <div class="canvas-page">
+          <div class="guide"></div>
+          <div class="guide-char" id="canvasGuide">A</div>
+          <canvas id="drawCanvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="view generate-view" id="generateView">
+      <aside class="sidebar">
+        <h2>Generate</h2>
+
+        <div class="group">
+          <label>Text</label>
+          <textarea class="control" id="generateText" rows="6">The quick brown fox jumps over the lazy dog.
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+Ä Ö Ü ä ö ü ß 0123456789</textarea>
+        </div>
+
+        <div class="group">
+          <label>Font size</label>
+          <input class="control" id="fontSize" type="number" min="8" max="80" value="25">
+        </div>
+
+        <div class="group">
+          <label>Paper</label>
+          <select class="control" id="paperColor">
+            <option value="white">White</option>
+            <option value="cream">Cream</option>
+          </select>
+        </div>
+
+        <div class="group">
+          <label class="check"><input type="checkbox" id="showLines"> Notebook lines</label>
+        </div>
+
+        <button class="primary" id="saveLocal">Save Project</button>
+        <button class="secondary" id="exportPng" style="margin-top:8px">Export PNG</button>
+        <button class="secondary" id="exportPdf" style="margin-top:8px">Export PDF</button>
+      </aside>
+
+      <div class="paper-area">
+        <div class="paper" id="paper">
+          <h1>Handwritten document</h1>
+          <div class="sample" id="generatedText"></div>
+          <div class="sample-small">Generated with Handwriting Studio</div>
+          <div class="paper-footer">Handwriting Studio</div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div id="gameModal">
-  <div class="game-modal-box">
-    <div class="game-modal-header">
-      <div class="game-modal-title" id="gameModalTitle">Game</div>
-      <button id="closeGameBtn">✕</button>
+<div class="overlay" id="adminOverlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Admin Panel</h3>
+      <button class="close" id="adminClose">Close</button>
     </div>
-    <iframe id="gameFrame" allowfullscreen></iframe>
-  </div>
-</div>
 
-<div id="bottomCloseGameContainer">
-  <button class="bottom-exit-btn" id="bottomCloseGameBtn">✕ Close Game</button>
-</div>
+    <div style="display:flex;gap:7px;margin-top:15px">
+      <button class="primary" id="generateCode" style="flex:1">Generate One-Time Code</button>
+      <button class="secondary" id="bannedBtn" style="flex:1">Banned / Unban</button>
+    </div>
 
-<div class="bottom-left-controls">
-  <button id="globalSettingsToggle" class="control-btn" title="Settings">⚙️</button>
-  <button id="adminBtn" class="control-btn" title="Admin Panel">🛡️</button>
-</div>
-
-<div id="globalSettingsModal" class="modal-overlay">
-  <div class="gs-box">
-    <h3>Settings</h3>
-    <div class="gs-row">
-      <label>Master Password</label>
-      <input type="text" id="settingPassInput" placeholder="New password">
-    </div>
-    <div class="gs-row">
-      <label>Theme Accent Color</label>
-      <input type="color" id="settingAccentColor" value="#a855f7" style="height: 40px; cursor: pointer;">
-    </div>
-    <div class="gs-row">
-      <label>Panic Key (e.g. x, Escape, etc.)</label>
-      <input type="text" id="settingPanicKey" placeholder="x">
-    </div>
-    <div class="gs-row">
-      <label>Panic Redirect URL</label>
-      <input type="text" id="settingPanicUrl" placeholder="https://www.schulmanager-online.de">
-    </div>
-    <div class="gs-row">
-      <label>Background Image File / URL</label>
-      <input type="file" id="settingBgFile" accept="image/*">
-    </div>
-    <div class="gs-row">
-      <label>Background Scale (<span id="scaleVal">1</span>)</label>
-      <input type="range" id="settingScale" min="0.5" max="3" step="0.1" value="1" style="width:100%;">
-    </div>
-    <div class="gs-row">
-      <label>Position X (Horizontal offset in px)</label>
-      <input type="number" id="settingPosX" value="0">
-    </div>
-    <div class="gs-row">
-      <label>Position Y (Vertical offset in px)</label>
-      <input type="number" id="settingPosY" value="0">
-    </div>
-    <div class="gs-actions">
-      <button id="gsCloseBtn" class="gs-close">Cancel</button>
-      <button id="gsSaveBtn" class="gs-save">Save</button>
-    </div>
+    <div class="code-result" id="newCode" style="display:none"></div>
+    <div class="small" style="margin-top:14px">Online users</div>
+    <div class="admin-list" id="onlineUsers"></div>
   </div>
 </div>
 
-<div id="adminModal" class="modal-overlay">
-  <div class="gs-box">
-    <h3>Admin Panel</h3>
-    <div class="gs-row">
-      <label>Change Master Password FOR EVERYONE</label>
-      <input type="text" id="adminNewPass" placeholder="Global new password">
+<div class="overlay" id="detailsOverlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>User Details</h3>
+      <button class="close" id="detailsClose">Close</button>
     </div>
-    <div class="gs-row">
-      <label>Online Users</label>
-      <div id="onlineUsersList" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px;"></div>
-    </div>
-    <div class="gs-actions">
-      <button id="adminCloseBtn" class="gs-close">Close</button>
-      <button id="adminSaveBtn" class="gs-save">Update Global Pass</button>
-    </div>
+    <pre id="detailsText" style="white-space:pre-wrap;word-break:break-word;color:#ddd;line-height:1.55"></pre>
   </div>
 </div>
 
-<button id="chatToggle" title="Open Chat">💬</button>
-<div id="chatPanel">
-  <div class="chat-header">
-    <h3>Chat</h3>
-    <div class="chat-header-btns">
-      <button class="chat-icon-btn" id="settingsBtn" title="Settings">⚙️</button>
-      <button class="chat-icon-btn" id="closeChatBtn" title="Close">✕</button>
+<div class="overlay" id="bannedOverlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Banned Users</h3>
+      <button class="close" id="bannedClose">Close</button>
     </div>
-  </div>
-  <div id="messagesArea"></div>
-  <div class="chat-input-area">
-    <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500">
-    <button id="sendBtn">Send</button>
-  </div>
-  <div id="settingsPanel">
-    <div class="settings-title">Chat Settings</div>
-    <div class="settings-row">
-      <label>Your nickname</label>
-      <input type="text" id="newNickInput" maxlength="20" placeholder="Enter new nickname">
-    </div>
-    <div class="settings-actions">
-      <button id="closeSettingsBtn">Cancel</button>
-      <button id="saveNickBtn">Save</button>
-    </div>
+    <div class="admin-list" id="bannedUsers"></div>
   </div>
 </div>
 
-<div id="nickModal">
-  <div class="nick-box">
-    <h3>Choose your nickname</h3>
-    <p>This name will be shown next to your messages</p>
-    <input type="text" id="nickInput" class="auth-input" placeholder="Nickname" maxlength="20" style="margin-bottom:18px;">
-    <button class="auth-btn" id="setNickBtn">Continue</button>
+<div class="overlay" id="settingsOverlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Settings</h3>
+      <button class="close" id="settingsClose">Close</button>
+    </div>
+    <div class="group" style="margin-top:18px">
+      <label>Accent color</label>
+      <input id="accent" type="color" value="#a855f7">
+    </div>
+    <button class="primary" id="saveSettings">Save</button>
   </div>
 </div>
 
-<!-- ПОДКЛЮЧЕНИЕ LUMIN SDK -->
-<script src="https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-  // =========================
-  // FIREBASE + ACCESS SYSTEM
-  // =========================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBVAM3wehDn1lUl_FIs-OdZMK5hx6CF_Aw",
-    authDomain: "aschapha228.firebaseapp.com",
-    databaseURL: "https://aschapha228-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "aschapha228",
-    storageBucket: "aschapha228.firebasestorage.app",
-    messagingSenderId: "462839368530",
-    appId: "1:462839368530:web:6e7411bd0aa7bb6165c88b",
-    measurementId: "G-BKMLF4GWRK"
-  };
+const firebaseConfig={
+  apiKey:"AIzaSyBVAM3wehDn1lUl_FIs-OdZMK5hx6CF_Aw",
+  authDomain:"aschapha228.firebaseapp.com",
+  databaseURL:"https://aschapha228-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"aschapha228",
+  storageBucket:"aschapha228.firebasestorage.app",
+  messagingSenderId:"462839368530",
+  appId:"1:462839368530:web:6e7411bd0aa7bb6165c88b",
+  measurementId:"G-BKMLF4GWRK"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const SITE_PASSWORD="55555";
+const ADMIN_CODE="3ed43ef3";
+const sessionKey="handwriting_session_id";
+let uid=localStorage.getItem(sessionKey);
+if(!uid){uid="user_"+Math.random().toString(36).slice(2,12);localStorage.setItem(sessionKey,uid)}
 
-  const messagesRef = db.ref("messages");
-  const presenceRef = db.ref("presence");
-  const redirectsRef = db.ref("userRedirects");
+let isAdmin=localStorage.getItem("handwriting_is_admin")==="true";
+let accessCode=localStorage.getItem("handwriting_access_code")||"";
+let currentIndex=0;
+let drawing=false;
+let strokes=[];
+let savedChars=JSON.parse(localStorage.getItem("handwriting_chars")||"{}");
 
-  const SITE_PASSWORD = "55555";
-  const ADMIN_CODE = "3ed43ef3";
+const chars=Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÄÖÜäöüß0123456789.,!?;:'\"-()[]{}+*/=<>@#$%&");
 
-  let firebaseUser = null;
-  let mySessionId = localStorage.getItem("ascapha_session_id");
-  if (!mySessionId) {
-    mySessionId = "user_" + cryptoRandomId();
-    localStorage.setItem("ascapha_session_id", mySessionId);
+const $=id=>document.getElementById(id);
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function show(id){$(id).style.display="flex"}
+function hide(id){$(id).style.display="none"}
+
+async function auth(){
+  try{
+    await firebase.auth().signInAnonymously();
+  }catch(e){
+    $("error").textContent="Firebase Authentication is disabled. Enable Anonymous sign-in in Firebase.";
+    return;
   }
 
-  let myAccessCode = localStorage.getItem("ascapha_access_code") || "";
-  let isAdmin = localStorage.getItem("ascapha_is_admin") === "true";
-  let myNickname = localStorage.getItem("ascapha_nickname") || "";
-
-  let panicKey = localStorage.getItem("ascapha_panic_key") || "x";
-  let panicUrl = localStorage.getItem("ascapha_panic_url") || "https://www.google.com";
-  let accentColor = localStorage.getItem("ascapha_accent_color") || "#a855f7";
-  let bgData = localStorage.getItem("ascapha_bg_image") || "";
-  let bgScale = parseFloat(localStorage.getItem("ascapha_bg_scale")) || 1;
-  let bgPosX = parseInt(localStorage.getItem("ascapha_bg_posx")) || 0;
-  let bgPosY = parseInt(localStorage.getItem("ascapha_bg_posy")) || 0;
-
-  function cryptoRandomId() {
-    if (window.crypto && crypto.getRandomValues) {
-      const a = new Uint32Array(3);
-      crypto.getRandomValues(a);
-      return Array.from(a).map(x => x.toString(36)).join("");
-    }
-    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const code=$("accessInput").value.trim();
+  if(code===SITE_PASSWORD){
+    accessCode="master_"+uid.slice(-8);
+    localStorage.setItem("handwriting_access_code",accessCode);
+    enter();
+    return;
   }
 
-  function escapeHtml(text) {
-    return String(text ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function triggerPanic(customUrl) {
-    let targetUrl = (customUrl || panicUrl || "https://www.google.com").trim();
-    if (!/^https?:\/\//i.test(targetUrl)) targetUrl = "https://" + targetUrl;
-    window.location.replace(targetUrl);
-  }
-
-  function getDeviceInfo() {
-    const ua = navigator.userAgent || "";
-    let device = "Desktop";
-    if (/iPad/i.test(ua)) device = "iPad";
-    else if (/iPhone/i.test(ua)) device = "iPhone";
-    else if (/Android/i.test(ua)) device = /Mobile/i.test(ua) ? "Android phone" : "Android tablet";
-    else if (/Macintosh/i.test(ua)) device = "Mac";
-    else if (/Windows/i.test(ua)) device = "Windows PC";
-    else if (/Linux/i.test(ua)) device = "Linux PC";
-
-    let browser = "Unknown";
-    if (/Edg\//i.test(ua)) browser = "Microsoft Edge";
-    else if (/Chrome\//i.test(ua)) browser = "Google Chrome";
-    else if (/Firefox\//i.test(ua)) browser = "Firefox";
-    else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browser = "Safari";
-
-    const lang = navigator.language || "";
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    const region = lang.includes("-") ? lang.split("-")[1].toUpperCase() : "";
-
-    return {
-      device,
-      browser,
-      os: navigator.platform || "Unknown",
-      language: lang || "Unknown",
-      region: region || "Unknown",
-      timezone: tz || "Unknown",
-      screen: `${screen.width} × ${screen.height}`,
-      userAgent: ua
-    };
-  }
-
-  function applyAccentColor(hex) {
-    document.documentElement.style.setProperty("--border-glow", hex);
-    document.documentElement.style.setProperty("--border-active", hex);
-    document.documentElement.style.setProperty("--text-muted", hex);
-    document.documentElement.style.setProperty("--neon-shadow", hex + "66");
-    document.documentElement.style.setProperty("--strong-glow", hex + "cc");
-  }
-  applyAccentColor(accentColor);
-
-  const bgImageElement = document.getElementById("bgImageElement");
-  function applyBackground() {
-    if (bgData) {
-      bgImageElement.src = bgData;
-      bgImageElement.style.display = "block";
-      bgImageElement.style.transform =
-        `translate(${bgPosX}px, ${bgPosY}px) scale(${bgScale})`;
-    } else {
-      bgImageElement.style.display = "none";
-    }
-  }
-  applyBackground();
-
-  window.addEventListener("keydown", e => {
-    if (e.key.toLowerCase() === panicKey.toLowerCase()) triggerPanic();
-  });
-
-  async function ensureFirebaseAuth() {
-    if (!firebaseUser) {
-      const result = await firebase.auth().signInAnonymously();
-      firebaseUser = result.user;
-    }
-    return firebaseUser;
-  }
-
-  firebase.auth().onAuthStateChanged(user => {
-    firebaseUser = user || null;
-  });
-
-  // Existing redirect mechanism, now also checks bans.
-  function listenForMyRedirects() {
-    redirectsRef.child(mySessionId).on("value", snap => {
-      const data = snap.val();
-      if (data && data.timestamp && data.timestamp > Date.now() - 60000) {
-        triggerPanic(data.url || "https://www.google.com");
-      }
-    });
-
-    db.ref(`bans/${mySessionId}`).on("value", snap => {
-      if (snap.exists() && snap.val() === true) {
-        triggerPanic("https://www.google.com");
-      }
-    });
-  }
-
-  listenForMyRedirects();
-
-  async function createOrUpdatePresence() {
-    if (!firebaseUser || !myAccessCode) return;
-
-    const info = getDeviceInfo();
-    const userRef = presenceRef.child(mySessionId);
-
-    await userRef.onDisconnect().update({ online: false, lastSeen: Date.now() });
-
-    await userRef.update({
-      sessionId: mySessionId,
-      code: myAccessCode,
-      nick: myNickname || "",
-      online: true,
-      lastSeen: Date.now(),
-      joinedAt: firebase.database.ServerValue.TIMESTAMP,
-      device: info.device,
-      browser: info.browser,
-      os: info.os,
-      language: info.language,
-      region: info.region,
-      timezone: info.timezone,
-      screen: info.screen,
-      userAgent: info.userAgent
-    });
-
-    if (!window.__presenceTimer) {
-      window.__presenceTimer = setInterval(() => {
-        userRef.update({ online: true, lastSeen: Date.now() }).catch(() => {});
-      }, 10000);
-    }
-  }
-
-  function showApp() {
-    document.getElementById("authOverlay").style.display = "none";
-    document.getElementById("appContent").style.display = "block";
-    if (isAdmin) document.getElementById("adminBtn").style.display = "flex";
-    initApp();
-  }
-
-  async function claimAccessCode(code) {
-    code = String(code || "").trim();
-
-    if (!code) return { ok: false, message: "Enter a code." };
-
-    // Main password. This is intentionally simple for the requested site.
-    if (code === SITE_PASSWORD) {
-      myAccessCode = "master_" + mySessionId.slice(-8);
-      localStorage.setItem("ascapha_access_code", myAccessCode);
-      return { ok: true };
-    }
-
-    // Admin bootstrap code. It is one-time globally.
-    if (code === ADMIN_CODE) {
-      const adminRef = db.ref("admin/claimed");
-      const snap = await adminRef.once("value");
-      if (snap.val() === true && !isAdmin) {
-        return { ok: false, message: "Admin code has already been used." };
-      }
-      await adminRef.set(true);
-      isAdmin = true;
-      localStorage.setItem("ascapha_is_admin", "true");
-      myAccessCode = "admin_" + mySessionId.slice(-8);
-      localStorage.setItem("ascapha_access_code", myAccessCode);
-      return { ok: true };
-    }
-
-    // Generated one-time code.
-    const codeRef = db.ref(`accessCodes/${code}`);
-    const snap = await codeRef.once("value");
-    const data = snap.val();
-
-    if (!data) return { ok: false, message: "Invalid or already used code." };
-    if (data.used === true) return { ok: false, message: "This code has already been used." };
-
-    await codeRef.update({
-      used: true,
-      usedBy: mySessionId,
-      usedAt: firebase.database.ServerValue.TIMESTAMP
-    });
-
-    myAccessCode = code;
-    localStorage.setItem("ascapha_access_code", code);
-    return { ok: true };
-  }
-
-  async function authenticate() {
-    const input = document.getElementById("passInput").value.trim();
-    const errorMsg = document.getElementById("errorMsg");
-    errorMsg.style.display = "none";
-
-    try {
-      await ensureFirebaseAuth();
-      const result = await claimAccessCode(input);
-
-      if (!result.ok) {
-        errorMsg.textContent = result.message || "Incorrect code.";
-        errorMsg.style.display = "block";
-        const inputEl = document.getElementById("passInput");
-        inputEl.animate(
-          [
-            { transform: "translateX(0)" },
-            { transform: "translateX(-8px)" },
-            { transform: "translateX(8px)" },
-            { transform: "translateX(0)" }
-          ],
-          { duration: 250 }
-        );
-        return;
-      }
-
-      showApp();
-    } catch (err) {
-      console.error(err);
-      errorMsg.textContent = "Firebase connection error.";
-      errorMsg.style.display = "block";
-    }
-  }
-
-  function checkEnter(event) {
-    if (event.key === "Enter") authenticate();
-  }
-
-  async function initApp() {
-    if (!myNickname && !isAdmin) {
-      document.getElementById("nickModal").classList.add("show");
-    } else {
-      await createOrUpdatePresence();
-    }
-    initChat();
-  }
-
-  // =========================
-  // CHAT
-  // =========================
-  let chatInitialized = false;
-
-  function initChat() {
-    if (chatInitialized) return;
-    chatInitialized = true;
-
-    const chatToggle = document.getElementById("chatToggle");
-    const chatPanel = document.getElementById("chatPanel");
-    const closeChatBtn = document.getElementById("closeChatBtn");
-    const sendBtn = document.getElementById("sendBtn");
-    const chatInput = document.getElementById("chatInput");
-    const messagesArea = document.getElementById("messagesArea");
-
-    chatToggle.onclick = () => chatPanel.classList.toggle("open");
-    closeChatBtn.onclick = () => chatPanel.classList.remove("open");
-
-    sendBtn.onclick = sendMessage;
-    chatInput.onkeydown = e => {
-      if (e.key === "Enter") sendMessage();
-    };
-
-    function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text || !myAccessCode) return;
-
-      messagesRef.push({
-        nick: myNickname || myAccessCode,
-        text,
-        time: Date.now(),
-        sessionId: mySessionId,
-        code: myAccessCode
-      });
-
-      chatInput.value = "";
-    }
-
-    messagesRef.limitToLast(50).on("child_added", snapshot => {
-      const msg = snapshot.val();
-      const key = snapshot.key;
-      const div = document.createElement("div");
-      div.className = "message" + (msg.sessionId === mySessionId ? " own" : "");
-      div.id = "msg-" + key;
-
-      div.innerHTML = `
-        <div class="msg-header">
-          <span class="msg-nick">${escapeHtml(msg.nick || "User")}</span>
-          <span class="msg-time">${new Date(msg.time || Date.now()).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</span>
-        </div>
-        <div class="msg-text">${escapeHtml(msg.text || "")}</div>
-        ${isAdmin ? `<button class="msg-delete" onclick="deleteMsg('${key}')">✕</button>` : ""}
-      `;
-
-      messagesArea.appendChild(div);
-      messagesArea.scrollTop = messagesArea.scrollHeight;
-    });
-
-    messagesRef.on("child_removed", snapshot => {
-      const el = document.getElementById("msg-" + snapshot.key);
-      if (el) el.remove();
-    });
-  }
-
-  window.deleteMsg = key => messagesRef.child(key).remove();
-
-  // =========================
-  // NICKNAME
-  // =========================
-  document.getElementById("setNickBtn").onclick = async () => {
-    const val = document.getElementById("nickInput").value.trim();
-    if (!val) return;
-
-    myNickname = val;
-    localStorage.setItem("ascapha_nickname", val);
-    document.getElementById("nickModal").classList.remove("show");
-    await createOrUpdatePresence();
-  };
-
-  // =========================
-  // SETTINGS
-  // =========================
-  const globalSettingsModal = document.getElementById("globalSettingsModal");
-
-  document.getElementById("globalSettingsToggle").onclick = () =>
-    globalSettingsModal.classList.add("show");
-
-  document.getElementById("gsCloseBtn").onclick = () =>
-    globalSettingsModal.classList.remove("show");
-
-  document.getElementById("gsSaveBtn").onclick = () => {
-    accentColor = document.getElementById("settingAccentColor").value;
-    localStorage.setItem("ascapha_accent_color", accentColor);
-    applyAccentColor(accentColor);
-
-    panicKey = document.getElementById("settingPanicKey").value || "x";
-    localStorage.setItem("ascapha_panic_key", panicKey);
-
-    panicUrl = document.getElementById("settingPanicUrl").value || "https://www.google.com";
-    localStorage.setItem("ascapha_panic_url", panicUrl);
-
-    globalSettingsModal.classList.remove("show");
-  };
-
-  // =========================
-  // ADMIN PANEL
-  // =========================
-  const adminModal = document.getElementById("adminModal");
-
-  document.getElementById("adminBtn").onclick = () => {
-    if (!isAdmin) return;
-    adminModal.classList.add("show");
-    loadOnlineUsers();
-  };
-
-  document.getElementById("adminCloseBtn").onclick = () =>
-    adminModal.classList.remove("show");
-
-  async function loadOnlineUsers() {
-    const snap = await presenceRef.once("value");
-    const users = snap.val() || {};
-    const list = document.getElementById("onlineUsersList");
-    list.innerHTML = "";
-
-    const entries = Object.values(users).filter(u => u && u.online !== false);
-
-    if (!entries.length) {
-      list.innerHTML = `<div style="color:#c084fc;padding:10px;">No online users.</div>`;
+  if(code===ADMIN_CODE){
+    const s=await db.ref("admin/claimed").once("value");
+    if(s.val()===true&&!isAdmin){
+      $("error").textContent="Admin code has already been claimed.";
       return;
     }
-
-    entries.forEach(u => {
-      const item = document.createElement("div");
-      item.className = "user-item";
-
-      item.innerHTML = `
-        <span style="font-weight:700;">${escapeHtml(u.code || "Unknown")}</span>
-        <span style="display:flex;gap:6px;">
-          <button class="user-kick-btn" style="background:#7c3aed;" onclick="showUserInfo('${escapeHtml(u.sessionId)}')">More</button>
-          <button class="user-kick-btn" onclick="kickUser('${escapeHtml(u.sessionId)}')">Kick</button>
-          <button class="user-kick-btn" style="background:#991b1b;" onclick="banUser('${escapeHtml(u.sessionId)}')">Ban</button>
-        </span>
-      `;
-
-      list.appendChild(item);
-    });
+    await db.ref("admin/claimed").set(true);
+    isAdmin=true;
+    localStorage.setItem("handwriting_is_admin","true");
+    accessCode="admin_"+uid.slice(-8);
+    localStorage.setItem("handwriting_access_code",accessCode);
+    enter();
+    return;
   }
 
-  window.showUserInfo = async sid => {
-    if (!isAdmin) return;
+  const ref=db.ref("accessCodes/"+code);
+  const s=await ref.once("value");
+  const d=s.val();
+  if(!d||d.used){
+    $("error").textContent="Invalid or already used code.";
+    return;
+  }
+  await ref.update({used:true,usedBy:uid,usedAt:Date.now()});
+  accessCode=code;
+  localStorage.setItem("handwriting_access_code",code);
+  enter();
+}
 
-    const snap = await presenceRef.child(sid).once("value");
-    const u = snap.val();
+function enter(){
+  hide("authOverlay");
+  $("app").style.display="flex";
+  if(isAdmin)$("adminBtn").style.display="block";
+  setupPresence();
+  updateStudio();
+  updateGenerate();
+}
 
-    if (!u) {
-      alert("User is no longer online.");
-      loadOnlineUsers();
-      return;
-    }
+$("unlockBtn").onclick=auth;
+$("accessInput").onkeydown=e=>{if(e.key==="Enter")auth()};
 
-    const info = `
-Code: ${u.code || "Unknown"}
-Device: ${u.device || "Unknown"}
-Browser: ${u.browser || "Unknown"}
-OS: ${u.os || "Unknown"}
-Language: ${u.language || "Unknown"}
-Region: ${u.region || "Unknown"}
-Timezone: ${u.timezone || "Unknown"}
-Screen: ${u.screen || "Unknown"}
-Nickname: ${u.nick || "None"}
-Session ID: ${u.sessionId || sid}
-Last seen: ${u.lastSeen ? new Date(u.lastSeen).toLocaleString() : "Unknown"}
-    `.trim();
-
-    openInfoModal(info);
+async function setupPresence(){
+  const info={
+    code:accessCode,
+    sessionId:uid,
+    device:/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?"Mobile/Tablet":"Desktop",
+    browser:/Edg/i.test(navigator.userAgent)?"Edge":/Chrome/i.test(navigator.userAgent)?"Chrome":/Firefox/i.test(navigator.userAgent)?"Firefox":/Safari/i.test(navigator.userAgent)?"Safari":"Unknown",
+    os:navigator.platform||"Unknown",
+    language:navigator.language||"Unknown",
+    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Unknown",
+    screen:screen.width+" × "+screen.height,
+    lastSeen:Date.now(),
+    online:true
   };
+  const r=db.ref("presence/"+uid);
+  await r.onDisconnect().update({online:false,lastSeen:Date.now()});
+  await r.set(info);
+  setInterval(()=>r.update({online:true,lastSeen:Date.now()}),10000);
+}
 
-  function openInfoModal(text) {
-    let modal = document.getElementById("userInfoModal");
+function updateStudio(){
+  const c=chars[currentIndex];
+  $("guideChar").textContent=c;
+  $("canvasGuide").textContent=c;
+  $("charCounter").textContent=(currentIndex+1)+" / "+chars.length;
+  $("progressBar").style.width=((currentIndex+1)/chars.length*100)+"%";
+  redraw();
+}
 
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "userInfoModal";
-      modal.className = "modal-overlay";
-      modal.innerHTML = `
-        <div class="gs-box" style="width:520px;">
-          <h3>User Information</h3>
-          <pre id="userInfoText" style="white-space:pre-wrap;word-break:break-word;color:#fff;background:rgba(0,0,0,.35);padding:14px;border-radius:10px;line-height:1.5;"></pre>
-          <div class="gs-actions">
-            <button id="closeUserInfo" class="gs-close">Close</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      document.getElementById("closeUserInfo").onclick = () =>
-        modal.classList.remove("show");
-    }
+function setupCanvas(){
+  const c=$("drawCanvas"), page=c.parentElement;
+  const rect=page.getBoundingClientRect();
+  const dpr=devicePixelRatio||1;
+  c.width=rect.width*dpr;c.height=rect.height*dpr;
+  const ctx=c.getContext("2d");
+  ctx.scale(dpr,dpr);
+  ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=4;
+}
+window.addEventListener("resize",setupCanvas);
+setTimeout(setupCanvas,100);
 
-    document.getElementById("userInfoText").textContent = text;
-    modal.classList.add("show");
+function pos(e){
+  const r=$("drawCanvas").getBoundingClientRect();
+  const p=e.touches?e.touches[0]:e;
+  return {x:p.clientX-r.left,y:p.clientY-r.top};
+}
+function startDraw(e){
+  e.preventDefault();drawing=true;
+  const p=pos(e);strokes.push([p]);redraw();
+}
+function moveDraw(e){
+  if(!drawing)return;e.preventDefault();
+  strokes[strokes.length-1].push(pos(e));redraw();
+}
+function endDraw(){drawing=false}
+
+$("drawCanvas").addEventListener("pointerdown",startDraw);
+$("drawCanvas").addEventListener("pointermove",moveDraw);
+$("drawCanvas").addEventListener("pointerup",endDraw);
+$("drawCanvas").addEventListener("pointercancel",endDraw);
+
+function redraw(){
+  const c=$("drawCanvas"),ctx=c.getContext("2d"),r=c.getBoundingClientRect();
+  ctx.clearRect(0,0,r.width,r.height);
+  ctx.strokeStyle="#111";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";
+  for(const stroke of strokes){
+    if(stroke.length<2)continue;
+    ctx.beginPath();ctx.moveTo(stroke[0].x,stroke[0].y);
+    for(let i=1;i<stroke.length;i++)ctx.lineTo(stroke[i].x,stroke[i].y);
+    ctx.stroke();
   }
+}
 
-  window.kickUser = async sid => {
-    if (!isAdmin) return;
-    if (!confirm("Kick this user?")) return;
+$("clearChar").onclick=()=>{strokes=[];redraw()};
+$("nextChar").onclick=()=>{
+  savedChars[chars[currentIndex]]=strokes;
+  localStorage.setItem("handwriting_chars",JSON.stringify(savedChars));
+  currentIndex=Math.min(chars.length-1,currentIndex+1);
+  strokes=savedChars[chars[currentIndex]]||[];
+  updateStudio();
+};
+$("backChar").onclick=()=>{
+  savedChars[chars[currentIndex]]=strokes;
+  localStorage.setItem("handwriting_chars",JSON.stringify(savedChars));
+  currentIndex=Math.max(0,currentIndex-1);
+  strokes=savedChars[chars[currentIndex]]||[];
+  updateStudio();
+};
+$("finishStudio").onclick=()=>{
+  savedChars[chars[currentIndex]]=strokes;
+  localStorage.setItem("handwriting_chars",JSON.stringify(savedChars));
+  alert("Your handwriting characters have been saved in this browser.");
+};
 
-    await redirectsRef.child(sid).set({
-      url: "https://www.google.com",
-      timestamp: Date.now(),
-      reason: "kick"
-    });
+function updateGenerate(){
+  $("generatedText").textContent=$("generateText").value;
+  $("generatedText").style.fontSize=$("fontSize").value+"px";
+  $("paper").style.background=$("paperColor").value==="cream"?"#fffbea":"#fff";
+  $("paper").style.backgroundImage=$("showLines").checked?
+    "repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#e7a0a0 32px)":"none";
+}
+["generateText","fontSize","paperColor","showLines"].forEach(id=>$(id).addEventListener("input",updateGenerate));
+$("saveLocal").onclick=()=>{
+  localStorage.setItem("handwriting_generate_text",$("generateText").value);
+  localStorage.setItem("handwriting_chars",JSON.stringify(savedChars));
+  alert("Project saved.");
+};
 
-    loadOnlineUsers();
-  };
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  $(t.dataset.view+"View").classList.add("active");
+  if(t.dataset.view==="studio")setTimeout(setupCanvas,50);
+});
 
-  window.banUser = async sid => {
-    if (!isAdmin) return;
-    if (!confirm("Ban this user permanently?")) return;
+$("settingsBtn").onclick=()=>show("settingsOverlay");
+$("settingsClose").onclick=()=>hide("settingsOverlay");
+$("saveSettings").onclick=()=>{
+  document.documentElement.style.setProperty("--accent",$("accent").value);
+  localStorage.setItem("handwriting_accent",$("accent").value);
+  hide("settingsOverlay");
+};
 
-    await db.ref(`bans/${sid}`).set(true);
-    await redirectsRef.child(sid).set({
-      url: "https://www.google.com",
-      timestamp: Date.now(),
-      reason: "ban"
-    });
+$("adminBtn").onclick=async()=>{
+  show("adminOverlay");
+  loadOnline();
+};
+$("adminClose").onclick=()=>hide("adminOverlay");
+$("detailsClose").onclick=()=>hide("detailsOverlay");
+$("bannedClose").onclick=()=>hide("bannedOverlay");
 
-    loadOnlineUsers();
-    alert("User banned.");
-  };
-
-  // Generate one-time access code.
-  async function generateAccessCode() {
-    if (!isAdmin) return;
-
-    const code = Math.random().toString(36).slice(2, 10).toUpperCase();
-
-    await db.ref(`accessCodes/${code}`).set({
-      used: false,
-      createdAt: firebase.database.ServerValue.TIMESTAMP,
-      createdBy: mySessionId
-    });
-
-    alert("New one-time code:\n\n" + code);
-  }
-
-  // Banned users list.
-  async function showBannedUsers() {
-    if (!isAdmin) return;
-
-    const snap = await db.ref("bans").once("value");
-    const bans = snap.val() || {};
-    const ids = Object.keys(bans);
-
-    let html = `<h3>Banned Users</h3>`;
-
-    if (!ids.length) {
-      html += `<div style="color:#c084fc;margin:15px 0;">No banned users.</div>`;
-    } else {
-      html += `<div style="max-height:300px;overflow:auto;">`;
-
-      for (const sid of ids) {
-        const userSnap = await presenceRef.child(sid).once("value");
-        const u = userSnap.val() || {};
-        html += `
-          <div class="user-item">
-            <span>${escapeHtml(u.code || sid)}</span>
-            <button class="user-kick-btn" style="background:#16a34a;" onclick="unbanUser('${escapeHtml(sid)}')">Unban</button>
-          </div>
-        `;
-      }
-
-      html += `</div>`;
-    }
-
-    html += `
-      <div class="gs-actions">
-        <button class="gs-close" onclick="closeCustomAdminDialog()">Close</button>
-      </div>
-    `;
-
-    openCustomAdminDialog(html);
-  }
-
-  function openCustomAdminDialog(html) {
-    let modal = document.getElementById("customAdminDialog");
-
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "customAdminDialog";
-      modal.className = "modal-overlay";
-      document.body.appendChild(modal);
-    }
-
-    modal.innerHTML = `<div class="gs-box" style="width:520px;">${html}</div>`;
-    modal.classList.add("show");
-  }
-
-  window.closeCustomAdminDialog = () => {
-    const modal = document.getElementById("customAdminDialog");
-    if (modal) modal.classList.remove("show");
-  };
-
-  window.unbanUser = async sid => {
-    if (!isAdmin) return;
-    await db.ref(`bans/${sid}`).remove();
-    closeCustomAdminDialog();
-    showBannedUsers();
-  };
-
-  // Add the new admin controls without destroying the old layout.
-  function addAdminControls() {
-    const box = document.querySelector("#adminModal .gs-box");
-    if (!box || document.getElementById("adminExtraControls")) return;
-
-    const extra = document.createElement("div");
-    extra.id = "adminExtraControls";
-    extra.innerHTML = `
-      <div class="gs-actions" style="margin-top:10px;">
-        <button class="gs-save" id="generateCodeBtn">Generate One-Time Code</button>
-        <button class="gs-close" id="bannedUsersBtn">Banned / Unban</button>
-      </div>
-    `;
-
-    box.insertBefore(extra, box.querySelector(".gs-actions"));
-    document.getElementById("generateCodeBtn").onclick = generateAccessCode;
-    document.getElementById("bannedUsersBtn").onclick = showBannedUsers;
-  }
-
-  addAdminControls();
-
-  // =========================
-  // LUMIN
-  // =========================
-  let luminInitialized = false;
-
-  function switchView(view) {
-    const basicGrid = document.getElementById("gamesGrid");
-    const luminContainer = document.getElementById("games");
-    const searchBox = document.querySelector(".search-box");
-    const tabBasic = document.getElementById("tabBasic");
-    const tabLumin = document.getElementById("tabLumin");
-
-    if (view === "basic") {
-      tabBasic.classList.add("active");
-      tabLumin.classList.remove("active");
-      basicGrid.style.display = "grid";
-      luminContainer.style.display = "none";
-      searchBox.style.visibility = "visible";
-    } else {
-      tabLumin.classList.add("active");
-      tabBasic.classList.remove("active");
-      basicGrid.style.display = "none";
-      luminContainer.style.display = "block";
-      searchBox.style.visibility = "hidden";
-
-      if (!luminInitialized) {
-        Lumin.init({
-          container: "#games",
-          theme: "dark"
-        });
-        luminInitialized = true;
-        setupLuminIframeInterceptor();
-      }
-    }
-  }
-
-  function setupLuminIframeInterceptor() {
-    const luminContainer = document.getElementById("games");
-
-    luminContainer.addEventListener("click", e => {
-      const link = e.target.closest("a") || e.target.closest("[data-url]");
-      if (link) {
-        const url = link.href || link.getAttribute("data-url");
-        if (url && !url.startsWith("javascript:")) {
-          e.preventDefault();
-          e.stopPropagation();
-          openGameInModal(url, "Lumin Game");
-        }
-      }
-    }, true);
-  }
-
-  // =========================
-  // GAME MODAL + SEARCH
-  // =========================
-  const gameModal = document.getElementById("gameModal");
-  const gameFrame = document.getElementById("gameFrame");
-  const gameModalTitle = document.getElementById("gameModalTitle");
-  const closeGameBtn = document.getElementById("closeGameBtn");
-
-  function openGameInModal(url, name) {
-    gameFrame.src = url;
-    gameModalTitle.innerText = name || "Game";
-    gameModal.classList.add("open");
-  }
-
-  document.querySelectorAll("#gamesGrid .card").forEach(card => {
-    card.addEventListener("click", () => {
-      openGameInModal(
-        card.getAttribute("data-url"),
-        card.querySelector(".name").innerText
-      );
-    });
+async function loadOnline(){
+  const snap=await db.ref("presence").once("value");
+  const data=snap.val()||{};
+  const list=$("onlineUsers");
+  list.innerHTML="";
+  const users=Object.values(data).filter(x=>x&&x.online!==false);
+  if(!users.length){list.innerHTML='<div class="small">No online users.</div>';return}
+  users.forEach(u=>{
+    const el=document.createElement("div");
+    el.className="user";
+    el.innerHTML=`<div class="user-code">${esc(u.code||"Unknown")}</div>
+    <div class="user-actions">
+      <button onclick="moreUser('${esc(u.sessionId)}')">More</button>
+      <button class="kick" onclick="kickUser('${esc(u.sessionId)}')">Kick</button>
+      <button class="ban" onclick="banUser('${esc(u.sessionId)}')">Ban</button>
+    </div>`;
+    list.appendChild(el);
   });
+}
 
-  function closeGame() {
-    gameModal.classList.remove("open");
-    gameFrame.src = "";
+window.moreUser=async id=>{
+  const s=await db.ref("presence/"+id).once("value"),u=s.val();
+  if(!u)return;
+  $("detailsText").textContent=
+`Access code: ${u.code||"Unknown"}
+Device: ${u.device||"Unknown"}
+Browser: ${u.browser||"Unknown"}
+OS: ${u.os||"Unknown"}
+Language: ${u.language||"Unknown"}
+Timezone: ${u.timezone||"Unknown"}
+Screen: ${u.screen||"Unknown"}
+Session ID: ${u.sessionId||id}
+Last seen: ${u.lastSeen?new Date(u.lastSeen).toLocaleString():"Unknown"}`;
+  show("detailsOverlay");
+};
+
+window.kickUser=async id=>{
+  if(!confirm("Kick this user?"))return;
+  await db.ref("userRedirects/"+id).set({url:"https://www.google.com",timestamp:Date.now(),reason:"kick"});
+  loadOnline();
+};
+window.banUser=async id=>{
+  if(!confirm("Ban this user?"))return;
+  await db.ref("bans/"+id).set(true);
+  await db.ref("userRedirects/"+id).set({url:"https://www.google.com",timestamp:Date.now(),reason:"ban"});
+  loadOnline();
+};
+
+$("generateCode").onclick=async()=>{
+  let code=Math.random().toString(36).slice(2,10).toUpperCase();
+  while((await db.ref("accessCodes/"+code).once("value")).exists())
+    code=Math.random().toString(36).slice(2,10).toUpperCase();
+  await db.ref("accessCodes/"+code).set({used:false,createdAt:Date.now(),createdBy:uid});
+  $("newCode").textContent=code;
+  $("newCode").style.display="block";
+};
+
+$("bannedBtn").onclick=async()=>{
+  const s=await db.ref("bans").once("value"),b=s.val()||{},list=$("bannedUsers");
+  list.innerHTML="";
+  for(const id of Object.keys(b)){
+    const u=(await db.ref("presence/"+id).once("value")).val()||{};
+    const el=document.createElement("div");
+    el.className="user";
+    el.innerHTML=`<div class="user-code">${esc(u.code||id)}</div>
+    <div class="user-actions"><button onclick="unbanUser('${esc(id)}')">Unban</button></div>`;
+    list.appendChild(el);
   }
+  if(!Object.keys(b).length)list.innerHTML='<div class="small">No banned users.</div>';
+  show("bannedOverlay");
+};
+window.unbanUser=async id=>{
+  await db.ref("bans/"+id).remove();
+  $("bannedBtn").click();
+};
 
-  closeGameBtn.addEventListener("click", closeGame);
-  document.getElementById("bottomCloseGameBtn").addEventListener("click", closeGame);
+db.ref("userRedirects/"+uid).on("value",s=>{
+  const d=s.val();
+  if(d&&d.timestamp>Date.now()-60000)location.replace(d.url||"https://www.google.com");
+});
+db.ref("bans/"+uid).on("value",s=>{
+  if(s.val()===true)location.replace("https://www.google.com");
+});
 
-  document.getElementById("searchInput").addEventListener("input", e => {
-    const query = e.target.value.toLowerCase();
-    document.querySelectorAll("#gamesGrid .card").forEach(card => {
-      const name = card.getAttribute("data-name") || "";
-      card.classList.toggle("hidden", !name.includes(query));
-    });
-  });
-
-  // Add a little admin UI help.
-  const originalAdminOpen = document.getElementById("adminBtn").onclick;
-  document.getElementById("adminBtn").onclick = () => {
-    if (!isAdmin) return;
-    adminModal.classList.add("show");
-    addAdminControls();
-    loadOnlineUsers();
-  };
-
-  // Automatically restore an already authenticated local session.
-  (async () => {
-    try {
-      await ensureFirebaseAuth();
-
-      if (myAccessCode || isAdmin) {
-        const banSnap = await db.ref(`bans/${mySessionId}`).once("value");
-        if (banSnap.val() === true) {
-          triggerPanic("https://www.google.com");
-          return;
-        }
-
-        showApp();
-      }
-    } catch (e) {
-      console.warn("Automatic session restore failed:", e);
+(async()=>{
+  try{
+    await firebase.auth().signInAnonymously();
+    if(accessCode||isAdmin){
+      const b=await db.ref("bans/"+uid).once("value");
+      if(b.val()===true)return location.replace("https://www.google.com");
+      enter();
     }
-  })();
+  }catch(e){console.error(e)}
+})();
 
+const oldAccent=localStorage.getItem("handwriting_accent");
+if(oldAccent)$("accent").value=oldAccent;
+const oldText=localStorage.getItem("handwriting_generate_text");
+if(oldText)$("generateText").value=oldText;
+updateGenerate();
 </script>
 </body>
 </html>
