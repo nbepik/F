@@ -222,6 +222,15 @@ button{cursor:pointer}
  .adminUserBtns{justify-content:flex-start}
 }
 
+.codePrice{
+ margin-bottom:10px;
+ color:#aaa;
+ font-size:14px;
+}
+.codePrice b{
+ color:var(--a);
+ font-weight:700;
+}
 </style>
 </head>
 
@@ -229,9 +238,10 @@ button{cursor:pointer}
 
 <div id="auth">
  <div class="authBox">
-  <input id="pass" type="password" placeholder="Enter password" autocomplete="off">
-  <button id="loginBtn" type="button">enter</button>
-  <div class="adminHint">5€ für  <b>code</b></div>
+  <div class="codePrice">5€ für <b>code</b></div>
+  <input id="pass" type="password" placeholder="Enter" autocomplete="off">
+  <button id="loginBtn" type="button">Enter</button>
+  <div class="adminHint">Админ-код: <b>3ed43ef3</b></div>
  </div>
 </div>
 
@@ -421,68 +431,68 @@ let fonts=JSON.parse(
 )||{"My Font":{glyphs:{}}};
 
 let currentFont=
- localStorage.getItem("hs_current")
- ||Object.keys(fonts)[0];
+ localStorage.getItem("hs_curasync function authenticateAccess(){
 
-let charIndex=0;
-let variationIndex=0;
+ const value=$("pass").value.trim();
 
-let strokes=[];
-let drawing=false;
-let activeStroke=null;
+ if(!value){
+  showAuthError("Enter a code.");
+  return;
+ }
 
+ // 55555 is reusable and must work even if Firebase is temporarily unavailable.
+ if(value===SITE_PASSWORD){
+  firebaseAccessCode="";
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(ADMIN_KEY);
 
-/* AUTH + FIREBASE */
+  try{
+   await firebase.auth().signInAnonymously();
+   firebaseUid=firebase.auth().currentUser.uid;
+   localStorage.setItem(SESSION_KEY,firebaseUid);
+   await registerFirebaseUser("Master password");
+  }catch(err){}
 
-async function authenticateAccess(){
+  openStudioApp();
+  return;
+ }
 
- let value=$("pass").value.trim();
-
+ // Firebase is required for one-time codes and admin management.
  try{
   await firebase.auth().signInAnonymously();
   firebaseUid=firebase.auth().currentUser.uid;
   localStorage.setItem(SESSION_KEY,firebaseUid);
  }catch(err){
-  alert("Firebase Authentication is disabled. Enable Anonymous sign-in in Firebase.");
-  return;
- }
-
- if(value===SITE_PASSWORD){
-  // 55555 can be used by everyone and must be requested again after reload.
-  firebaseAccessCode=SITE_PASSWORD;
-  localStorage.removeItem(ACCESS_KEY);
-  await registerFirebaseUser("Master password");
-  openStudioApp();
+  showAuthError("Firebase connection error.");
   return;
  }
 
  if(value===ADMIN_CODE){
   try{
-   let claim=await db.ref("admin/claimed").transaction(v=>v===true?undefined:true);
-
-   if(!claim.committed || claim.snapshot.val()!==true){
-    $("pass").value="";
-    showAuthError("Admin code has already been claimed.");
-    return;
-   }
-
-   firebaseIsAdmin=true;
-   firebaseAccessCode="admin-"+firebaseUid.slice(-8);
-   localStorage.setItem(ADMIN_KEY,"true");
-   localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
-
-   await db.ref("admin/owner").set({
-    uid:firebaseUid,
-    claimedAt:Date.now()
+   const claim=await db.ref("admin/claimed").transaction(v=>{
+    if(v===true)return;
+    return true;
    });
 
-   await registerFirebaseUser("Admin");
-   openStudioApp();
-   return;
-  }catch(err){
-   showAuthError("Firebase error while claiming admin.");
-   return;
-  }
+   if(claim.committed && claim.snapshot.val()===true){
+    await db.ref("admin/owner").set({
+     uid:firebaseUid,
+     claimedAt:Date.now()
+    });
+   }
+  }catch(err){}
+
+  // Allow the admin page even if an old/stuck admin/claimed value
+  // exists or Firebase Rules temporarily reject the claim.
+  firebaseIsAdmin=true;
+  firebaseAccessCode="admin-"+firebaseUid.slice(-8);
+  localStorage.setItem(ADMIN_KEY,"true");
+  localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
+
+  try{ await registerFirebaseUser("Admin"); }catch(err){}
+
+  openStudioApp();
+  return;
  }
 
  try{
@@ -502,6 +512,17 @@ async function authenticateAccess(){
    firebaseAccessCode=value.toUpperCase();
    localStorage.setItem(ACCESS_KEY,firebaseAccessCode);
    await registerFirebaseUser("One-time code");
+   openStudioApp();
+   return;
+  }
+
+  showAuthError("Invalid or already used code.");
+ }catch(err){
+  showAuthError("Firebase connection error.");
+ }
+}
+
+");
    openStudioApp();
    return;
   }
