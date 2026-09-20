@@ -27,6 +27,7 @@ button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 
 /* AUTH */
+
 #auth{
  position:fixed;
  inset:0;
@@ -52,6 +53,7 @@ button{cursor:pointer}
 }
 
 /* APP */
+
 #app{
  display:none;
  width:100%;
@@ -87,6 +89,7 @@ button{cursor:pointer}
 }
 
 /* MAIN */
+
 .page{
  width:100%;
  height:calc(100vh - 62px);
@@ -97,6 +100,7 @@ button{cursor:pointer}
 }
 
 /* GENERATOR */
+
 #generate{
  display:flex;
  gap:10px;
@@ -159,7 +163,8 @@ button{cursor:pointer}
  border-color:var(--a);
 }
 
-/* A4 AREA */
+/* A4 */
+
 .sheetWrap{
  flex:1;
  min-width:0;
@@ -187,6 +192,7 @@ button{cursor:pointer}
 }
 
 /* STUDIO */
+
 #studio{
  display:none;
  flex-direction:column;
@@ -197,28 +203,32 @@ button{cursor:pointer}
 }
 
 .studioHead{
- width:min(720px,100%);
+ width:min(760px,100%);
  display:flex;
  align-items:center;
  justify-content:space-between;
+ gap:8px;
  flex:none;
 }
 
 .counter{
  color:#aaa;
  font-size:12px;
+ white-space:nowrap;
 }
 
 .studioBtns{
  display:flex;
  gap:5px;
+ flex-wrap:wrap;
+ justify-content:flex-end;
 }
 
 .studioBtns button{
  background:#160c20;
  border:1px solid #382044;
  color:#ddd;
- padding:7px 11px;
+ padding:7px 10px;
  border-radius:7px;
  font-size:12px;
 }
@@ -232,9 +242,11 @@ button{cursor:pointer}
  cursor:not-allowed;
 }
 
+/* DRAWING */
+
 .drawWrap{
  width:min(720px,100%);
- max-height:calc(100% - 45px);
+ max-height:calc(100% - 50px);
  background:#160d1e;
  border:1px solid #33203f;
  border-radius:11px;
@@ -254,6 +266,7 @@ button{cursor:pointer}
 }
 
 /* SETTINGS */
+
 .settings{
  display:none;
  position:fixed;
@@ -302,24 +315,63 @@ button{cursor:pointer}
 }
 
 /* SMALL HEIGHT */
+
 @media(max-height:700px){
+
  #app{padding:7px}
+
  .top{height:36px}
- .page{height:calc(100vh - 50px);padding:7px}
- .side{width:180px;min-width:180px;padding:8px}
- .side label{margin:4px 0 2px;font-size:10px}
- .side input,.side textarea,.side select{padding:5px}
- .side textarea{height:55px}
- .side button{padding:5px;margin-top:4px;font-size:11px}
- .tab,.gear{padding:5px 11px}
+
+ .page{
+  height:calc(100vh - 50px);
+  padding:7px;
+ }
+
+ .side{
+  width:180px;
+  min-width:180px;
+  padding:8px;
+ }
+
+ .side label{
+  margin:4px 0 2px;
+  font-size:10px;
+ }
+
+ .side input,
+ .side textarea,
+ .side select{
+  padding:5px;
+ }
+
+ .side textarea{
+  height:55px;
+ }
+
+ .side button{
+  padding:5px;
+  margin-top:4px;
+  font-size:11px;
+ }
+
+ .tab,.gear{
+  padding:5px 11px;
+ }
+
+ .studioBtns button{
+  padding:5px 8px;
+  font-size:11px;
+ }
 }
 
-/* VERY SMALL WIDTH */
+/* SMALL WIDTH */
+
 @media(max-width:600px){
+
  #generate{
   flex-direction:column;
  }
- 
+
  .side{
   width:100%;
   min-width:0;
@@ -329,31 +381,42 @@ button{cursor:pointer}
   gap:5px;
   overflow:hidden;
  }
- 
+
  .side label{
   margin:2px 0;
  }
- 
+
  .side textarea{
   height:42px;
  }
- 
+
  .side button{
   margin:0;
  }
- 
+
  .sheetWrap{
   min-height:0;
  }
- 
+
  .sheet{
   height:100%;
   max-height:100%;
  }
+
+ .studioHead{
+  flex-direction:column;
+  align-items:center;
+ }
+
+ .studioBtns{
+  justify-content:center;
+ }
 }
 
-/* TINY HEIGHT */
+/* VERY SMALL HEIGHT */
+
 @media(max-height:550px){
+
  .side{
   grid-template-columns:repeat(3,1fr);
  }
@@ -363,9 +426,14 @@ button{cursor:pointer}
 
 <body>
 
+<!-- AUTH -->
+
 <div id="auth">
  <input id="pass" type="password" placeholder="Enter password" autocomplete="off">
 </div>
+
+
+<!-- APP -->
 
 <div id="app">
 
@@ -374,6 +442,9 @@ button{cursor:pointer}
   <button class="tab" id="studioTab">Studio</button>
   <button class="gear" id="settingsBtn">⚙</button>
  </div>
+
+
+ <!-- GENERATE -->
 
  <section class="page" id="generate">
 
@@ -419,18 +490,33 @@ This is my handwriting.</textarea>
 
  </section>
 
+
+ <!-- STUDIO -->
+
  <section class="page" id="studio">
 
   <div class="studioHead">
+
    <div class="counter" id="counter"></div>
 
    <div class="studioBtns">
-    <button id="back">← Back</button>
+
+    <!-- VARIATIONS -->
+    <button id="newVariation">＋ New Variation</button>
+    <button id="variationBack">← Variation Back</button>
+
+    <!-- CHARACTER NAVIGATION -->
+    <button id="charBack">← Character</button>
+
     <button id="clear">Clear</button>
     <button id="save">Save</button>
-    <button id="next">Next →</button>
+
+    <button id="charNext">Character →</button>
+
    </div>
+
   </div>
+
 
   <div class="drawWrap">
    <canvas id="drawCanvas" width="1200" height="700"></canvas>
@@ -440,7 +526,11 @@ This is my handwriting.</textarea>
 
 </div>
 
+
+<!-- SETTINGS -->
+
 <div class="settings" id="settings">
+
  <div class="settingsBox">
 
   <div class="settingsTop">
@@ -452,10 +542,16 @@ This is my handwriting.</textarea>
   <input id="accent" type="color" value="#a855f7">
 
  </div>
+
 </div>
 
+
 <script>
+
 const $=id=>document.getElementById(id);
+
+
+/* CHARACTERS */
 
 const chars=[
  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -465,113 +561,217 @@ const chars=[
  ...`.,!?;:'"-–—_()[]{}/\\@#$%&*+=<>€£¥©®™°§…«»„“”’`
 ];
 
-let fonts=JSON.parse(localStorage.getItem("hs_fonts")||"null")||{
+
+/* FONT DATA */
+
+let fonts=JSON.parse(
+ localStorage.getItem("hs_fonts")||"null"
+)||{
  "My Font":{glyphs:{}}
 };
 
-let currentFont=localStorage.getItem("hs_current")||Object.keys(fonts)[0];
+let currentFont=
+ localStorage.getItem("hs_current")
+ ||Object.keys(fonts)[0];
+
 let charIndex=0;
+
+
+/*
+ Each character now looks like:
+
+ glyphs:{
+   A:{
+     variations:[
+       {strokes:[]},
+       {strokes:[]},
+       {strokes:[]}
+     ],
+     current:0
+   }
+ }
+*/
+
+
+let variationIndex=0;
+
 let strokes=[];
 let drawing=false;
 let activeStroke=null;
 
+
+/* AUTH */
+
 $("pass").addEventListener("keydown",e=>{
- if(e.key==="Enter"){
-  if($("pass").value==="0000"){
-   $("auth").style.display="none";
-   $("app").style.display="block";
-   setTimeout(()=>{
-    resizeGenerate();
-    resizeDraw();
-    loadGlyph();
-    render();
-   },20);
-  }else{
-   $("pass").animate(
-    [
-     {transform:"translateX(-7px)"},
-     {transform:"translateX(7px)"},
-     {transform:"translateX(0)"}
-    ],
-    {duration:180}
-   );
-   $("pass").value="";
-  }
+
+ if(e.key!=="Enter")return;
+
+ if($("pass").value==="0000"){
+
+  $("auth").style.display="none";
+  $("app").style.display="block";
+
+  setTimeout(()=>{
+
+   resizeGenerate();
+   resizeDraw();
+   loadGlyph();
+   render();
+
+  },20);
+
+ }else{
+
+  $("pass").animate(
+   [
+    {transform:"translateX(-7px)"},
+    {transform:"translateX(7px)"},
+    {transform:"translateX(0)"}
+   ],
+   {duration:180}
+  );
+
+  $("pass").value="";
  }
+
 });
+
 
 /* TABS */
 
 function tab(which){
- $("generate").style.display=which==="generate"?"flex":"none";
- $("studio").style.display=which==="studio"?"flex":"none";
 
- $("genTab").classList.toggle("active",which==="generate");
- $("studioTab").classList.toggle("active",which==="studio");
+ $("generate").style.display=
+  which==="generate"?"flex":"none";
+
+ $("studio").style.display=
+  which==="studio"?"flex":"none";
+
+ $("genTab").classList.toggle(
+  "active",
+  which==="generate"
+ );
+
+ $("studioTab").classList.toggle(
+  "active",
+  which==="studio"
+ );
 
  setTimeout(()=>{
+
   if(which==="generate"){
+
    resizeGenerate();
    render();
+
   }else{
+
    resizeDraw();
    drawStudio();
+
   }
+
  },20);
 }
 
 $("genTab").onclick=()=>tab("generate");
 $("studioTab").onclick=()=>tab("studio");
 
+
 /* SETTINGS */
 
-let accent=localStorage.getItem("hs_accent")||"#a855f7";
+let accent=
+ localStorage.getItem("hs_accent")
+ ||"#a855f7";
 
-document.documentElement.style.setProperty("--a",accent);
+document.documentElement.style.setProperty(
+ "--a",
+ accent
+);
+
 $("accent").value=accent;
 
-$("settingsBtn").onclick=()=>$("settings").style.display="flex";
-$("closeSettings").onclick=()=>$("settings").style.display="none";
+$("settingsBtn").onclick=()=>
+ $("settings").style.display="flex";
+
+$("closeSettings").onclick=()=>
+ $("settings").style.display="none";
 
 $("settings").onclick=e=>{
+
  if(e.target===$("settings"))
   $("settings").style.display="none";
+
 };
 
 $("accent").oninput=e=>{
+
  accent=e.target.value;
- document.documentElement.style.setProperty("--a",accent);
- localStorage.setItem("hs_accent",accent);
+
+ document.documentElement.style.setProperty(
+  "--a",
+  accent
+ );
+
+ localStorage.setItem(
+  "hs_accent",
+  accent
+ );
 };
 
-/* FONTS */
+
+/* FONT STORAGE */
 
 function saveFonts(){
- localStorage.setItem("hs_fonts",JSON.stringify(fonts));
- localStorage.setItem("hs_current",currentFont);
+
+ localStorage.setItem(
+  "hs_fonts",
+  JSON.stringify(fonts)
+ );
+
+ localStorage.setItem(
+  "hs_current",
+  currentFont
+ );
 }
 
+
 function updateFontList(){
+
  $("fontSelect").innerHTML="";
 
  Object.keys(fonts).forEach(name=>{
+
   let o=document.createElement("option");
+
   o.value=name;
   o.textContent=name;
   o.selected=name===currentFont;
+
   $("fontSelect").appendChild(o);
+
  });
 }
 
+
 $("fontSelect").onchange=e=>{
+
  currentFont=e.target.value;
+
  charIndex=0;
+ variationIndex=0;
+
  saveFonts();
+
  loadGlyph();
  render();
 };
 
+
+/* NEW FONT */
+
 $("newFont").onclick=()=>{
+
  let name=prompt(
   "Font name:",
   "My Font "+(Object.keys(fonts).length+1)
@@ -582,46 +782,69 @@ $("newFont").onclick=()=>{
  name=name.trim();
 
  if(!name||fonts[name]){
+
   alert("That font already exists.");
   return;
+
  }
 
  fonts[name]={glyphs:{}};
+
  currentFont=name;
  charIndex=0;
+ variationIndex=0;
 
  saveFonts();
+
  updateFontList();
+
  loadGlyph();
  render();
 };
 
+
+/* RENAME */
+
 $("renameFont").onclick=()=>{
- let name=prompt("New font name:",currentFont);
+
+ let name=prompt(
+  "New font name:",
+  currentFont
+ );
 
  if(!name||name===currentFont)return;
 
  name=name.trim();
 
  if(!name||fonts[name]){
+
   alert("That font already exists.");
   return;
+
  }
 
  fonts[name]=fonts[currentFont];
+
  delete fonts[currentFont];
 
  currentFont=name;
 
  saveFonts();
+
  updateFontList();
+
  render();
 };
 
+
+/* DELETE */
+
 $("deleteFont").onclick=()=>{
+
  let names=Object.keys(fonts);
 
  if(names.length<=1){
+
   alert("You need at least one font.");
   return;
  }
@@ -633,16 +856,20 @@ $("deleteFont").onclick=()=>{
  currentFont=Object.keys(fonts)[0];
 
  charIndex=0;
+ variationIndex=0;
 
  saveFonts();
+
  updateFontList();
+
  loadGlyph();
  render();
 };
 
 updateFontList();
 
-/* SETTINGS SAVE */
+
+/* GENERATOR SETTINGS */
 
 [
  ["fontSize",32],
@@ -652,23 +879,31 @@ updateFontList();
  ["paperColor","#ffffff"]
 ].forEach(([id,def])=>{
 
- let saved=localStorage.getItem("hs_setting_"+id);
+ let saved=
+  localStorage.getItem("hs_setting_"+id);
 
  if(saved!==null)
   $(id).value=saved;
 
  $(id).addEventListener("input",()=>{
-  localStorage.setItem("hs_setting_"+id,$(id).value);
+
+  localStorage.setItem(
+   "hs_setting_"+id,
+   $(id).value
+  );
+
   render();
  });
 });
 
 $("text").addEventListener("input",render);
 
+
 /* DRAWING */
 
 const dc=$("drawCanvas");
 const ctx=dc.getContext("2d");
+
 
 function resizeDraw(){
 
@@ -678,25 +913,36 @@ function resizeDraw(){
 
  let width=r.width;
  let height=width*.5833;
- let dpr=Math.max(1,window.devicePixelRatio||1);
+
+ let dpr=Math.max(
+  1,
+  window.devicePixelRatio||1
+ );
 
  dc.width=Math.round(width*dpr);
  dc.height=Math.round(height*dpr);
 
- ctx.setTransform(dpr,0,0,dpr,0,0);
+ ctx.setTransform(
+  dpr,0,0,dpr,0,0
+ );
 
  drawStudio();
 }
+
 
 function pos(e){
 
  let r=dc.getBoundingClientRect();
 
  return{
-  x:(e.clientX-r.left)*(dc.clientWidth/r.width),
-  y:(e.clientY-r.top)*(dc.clientHeight/r.height)
+  x:(e.clientX-r.left)*
+    (dc.clientWidth/r.width),
+
+  y:(e.clientY-r.top)*
+    (dc.clientHeight/r.height)
  };
 }
+
 
 dc.addEventListener("pointerdown",e=>{
 
@@ -711,10 +957,12 @@ dc.addEventListener("pointerdown",e=>{
  let p=pos(e);
 
  activeStroke=[p];
+
  strokes.push(activeStroke);
 
  drawStudio();
 });
+
 
 dc.addEventListener("pointermove",e=>{
 
@@ -726,6 +974,7 @@ dc.addEventListener("pointermove",e=>{
 
  drawStudio();
 });
+
 
 function endDraw(e){
 
@@ -740,6 +989,9 @@ function endDraw(e){
 dc.addEventListener("pointerup",endDraw);
 dc.addEventListener("pointercancel",endDraw);
 
+
+/* DRAW LINE */
+
 function line(points,color,width){
 
  if(!points.length)return;
@@ -748,19 +1000,36 @@ function line(points,color,width){
 
  ctx.lineCap="round";
  ctx.lineJoin="round";
+
  ctx.strokeStyle=color;
  ctx.lineWidth=width;
 
- ctx.moveTo(points[0].x,points[0].y);
+ ctx.moveTo(
+  points[0].x,
+  points[0].y
+ );
 
- for(let i=1;i<points.length;i++)
-  ctx.lineTo(points[i].x,points[i].y);
+ for(let i=1;i<points.length;i++){
 
- if(points.length===1)
-  ctx.lineTo(points[0].x+.1,points[0].y+.1);
+  ctx.lineTo(
+   points[i].x,
+   points[i].y
+  );
+ }
+
+ if(points.length===1){
+
+  ctx.lineTo(
+   points[0].x+.1,
+   points[0].y+.1
+  );
+ }
 
  ctx.stroke();
 }
+
+
+/* GUIDE */
 
 function guideChar(){
 
@@ -771,16 +1040,26 @@ function guideChar(){
 
  ctx.save();
 
- ctx.font=`${Math.min(w,h)*.42}px Arial`;
+ ctx.font=
+  `${Math.min(w,h)*.42}px Arial`;
+
  ctx.textAlign="center";
  ctx.textBaseline="middle";
 
- ctx.fillStyle="rgba(120,120,120,.22)";
+ ctx.fillStyle=
+  "rgba(120,120,120,.22)";
 
- ctx.fillText(ch,w/2,h*.51);
+ ctx.fillText(
+  ch,
+  w/2,
+  h*.51
+ );
 
  ctx.restore();
 }
+
+
+/* STUDIO DRAW */
 
 function drawStudio(){
 
@@ -794,68 +1073,110 @@ function drawStudio(){
  ctx.fillStyle="#fff";
  ctx.fillRect(0,0,w,h);
 
- /* RED NOTEBOOK LINES */
+
+ /* RED LINES */
 
  ctx.lineWidth=2;
- ctx.strokeStyle="rgba(220,40,40,.35)";
+ ctx.strokeStyle=
+  "rgba(220,40,40,.35)";
 
  [.22,.42,.62,.82].forEach(y=>{
 
   ctx.beginPath();
+
   ctx.moveTo(0,h*y);
   ctx.lineTo(w,h*y);
-  ctx.stroke();
 
+  ctx.stroke();
  });
+
+
+ /* GREY GUIDE */
 
  guideChar();
 
+
  /* BLACK WRITING */
 
- for(const s of strokes)
-  line(s,"#111",Math.max(3,w/170));
+ for(const s of strokes){
+
+  line(
+   s,
+   "#111",
+   Math.max(3,w/170)
+  );
+ }
 }
+
+
+/* CREATE CHARACTER DATA */
+
+function ensureCharacter(ch){
+
+ let g=fonts[currentFont].glyphs[ch];
+
+ /*
+  Old fonts from the previous version are
+  automatically converted into variation 1.
+ */
+
+ if(!g){
+
+  g={
+   variations:[],
+   current:0
+  };
+
+  fonts[currentFont].glyphs[ch]=g;
+
+ }else if(!g.variations){
+
+  let oldStrokes=g.strokes||[];
+
+  g={
+   variations:[
+    {
+     strokes:oldStrokes
+    }
+   ],
+   current:0
+  };
+
+  fonts[currentFont].glyphs[ch]=g;
+ }
+
+ return g;
+}
+
+
+/* SAVE CURRENT VARIATION */
 
 function saveGlyph(){
 
  let ch=chars[charIndex];
 
- fonts[currentFont].glyphs[ch]={
-  strokes:JSON.parse(JSON.stringify(strokes)),
-  width:dc.clientWidth,
-  height:dc.clientHeight
+ let g=ensureCharacter(ch);
+
+ if(!g.variations[variationIndex]){
+
+  g.variations[variationIndex]={
+   strokes:[]
+  };
+ }
+
+ g.variations[variationIndex]={
+  strokes:
+   JSON.parse(JSON.stringify(strokes))
  };
+
+ g.current=variationIndex;
 
  saveFonts();
  render();
 }
 
-$("save").onclick=saveGlyph;
 
-$("clear").onclick=()=>{
- strokes=[];
- drawStudio();
-};
-
-$("back").onclick=()=>{
- if(charIndex<=0)return;
-
- saveGlyph();
-
- charIndex--;
-
- loadGlyph();
-};
-
-$("next").onclick=()=>{
- if(charIndex>=chars.length-1)return;
-
- saveGlyph();
-
- charIndex++;
-
- loadGlyph();
-};
+/* LOAD CURRENT VARIATION */
 
 function loadGlyph(){
 
@@ -863,23 +1184,210 @@ function loadGlyph(){
 
  let g=fonts[currentFont].glyphs[ch];
 
- strokes=g?.strokes
-  ?JSON.parse(JSON.stringify(g.strokes))
+ if(!g){
+
+  g={
+   variations:[
+    {strokes:[]}
+   ],
+   current:0
+  };
+
+  fonts[currentFont].glyphs[ch]=g;
+
+ }else if(!g.variations){
+
+  let old=g.strokes||[];
+
+  g={
+   variations:[
+    {strokes:old}
+   ],
+   current:0
+  };
+
+  fonts[currentFont].glyphs[ch]=g;
+ }
+
+
+ if(
+  variationIndex<0||
+  variationIndex>=g.variations.length
+ ){
+
+  variationIndex=
+   Math.max(
+    0,
+    g.variations.length-1
+   );
+ }
+
+
+ let variation=
+  g.variations[variationIndex];
+
+
+ strokes=variation?.strokes
+  ?JSON.parse(
+    JSON.stringify(variation.strokes)
+   )
   :[];
 
- $("counter").textContent=
-  `${charIndex+1} / ${chars.length}  •  "${ch}"`;
 
- $("back").disabled=charIndex===0;
- $("next").disabled=charIndex===chars.length-1;
+ updateCounter();
 
  drawStudio();
 }
+
+
+function updateCounter(){
+
+ let ch=chars[charIndex];
+
+ let g=ensureCharacter(ch);
+
+ let total=
+  Math.max(
+   1,
+   g.variations.length
+  );
+
+ $("counter").textContent=
+  `${charIndex+1}/${chars.length}  •  "${ch}"  •  Variation ${variationIndex+1}/${total}`;
+
+
+ $("charBack").disabled=
+  charIndex===0;
+
+
+ $("charNext").disabled=
+  charIndex===chars.length-1;
+
+
+ $("variationBack").disabled=
+  variationIndex===0;
+}
+
+
+/* NEW VARIATION */
+
+$("newVariation").onclick=()=>{
+
+ let ch=chars[charIndex];
+
+ let g=ensureCharacter(ch);
+
+ if(g.variations.length>=99){
+
+  alert("Maximum 99 variations.");
+  return;
+ }
+
+
+ /*
+  Save the current variation first.
+ */
+
+ g.variations[variationIndex]={
+  strokes:
+   JSON.parse(JSON.stringify(strokes))
+ };
+
+
+ /*
+  Create the new variation.
+ */
+
+ g.variations.push({
+  strokes:[]
+ });
+
+
+ variationIndex=
+  g.variations.length-1;
+
+ g.current=variationIndex;
+
+ strokes=[];
+
+ saveFonts();
+
+ updateCounter();
+
+ drawStudio();
+};
+
+
+/* VARIATION BACK */
+
+$("variationBack").onclick=()=>{
+
+ if(variationIndex<=0)return;
+
+ /*
+  Save the current one before going back.
+ */
+
+ saveGlyph();
+
+ variationIndex--;
+
+ loadGlyph();
+};
+
+
+/* CLEAR */
+
+$("clear").onclick=()=>{
+
+ strokes=[];
+
+ drawStudio();
+};
+
+
+/* SAVE */
+
+$("save").onclick=saveGlyph;
+
+
+/* CHARACTER BACK */
+
+$("charBack").onclick=()=>{
+
+ if(charIndex<=0)return;
+
+ saveGlyph();
+
+ charIndex--;
+
+ variationIndex=0;
+
+ loadGlyph();
+};
+
+
+/* CHARACTER NEXT */
+
+$("charNext").onclick=()=>{
+
+ if(charIndex>=chars.length-1)return;
+
+ saveGlyph();
+
+ charIndex++;
+
+ variationIndex=0;
+
+ loadGlyph();
+};
+
 
 /* GENERATOR */
 
 const gc=$("genCanvas");
 const gx=gc.getContext("2d");
+
 
 function resizeGenerate(){
 
@@ -889,15 +1397,32 @@ function resizeGenerate(){
 
  let dpr=2;
 
- gc.width=Math.round(r.width*dpr);
- gc.height=Math.round(r.height*dpr);
+ gc.width=Math.round(
+  r.width*dpr
+ );
 
- gx.setTransform(dpr,0,0,dpr,0,0);
+ gc.height=Math.round(
+  r.height*dpr
+ );
+
+ gx.setTransform(
+  dpr,0,0,dpr,0,0
+ );
 }
 
-function drawGlyph(g,x,y,size,color){
 
- if(!g?.strokes?.length)return 0;
+/* DRAW ONE GLYPH */
+
+function drawGlyph(
+ g,
+ x,
+ y,
+ size,
+ color
+){
+
+ if(!g?.strokes?.length)
+  return 0;
 
  let sx=size/100;
 
@@ -906,35 +1431,70 @@ function drawGlyph(g,x,y,size,color){
  let maxX=-Infinity;
  let maxY=-Infinity;
 
- g.strokes.forEach(s=>s.forEach(p=>{
 
-  minX=Math.min(minX,p.x);
-  minY=Math.min(minY,p.y);
-  maxX=Math.max(maxX,p.x);
-  maxY=Math.max(maxY,p.y);
+ g.strokes.forEach(s=>
+  s.forEach(p=>{
 
- }));
+   minX=Math.min(
+    minX,
+    p.x
+   );
 
- if(!isFinite(minX))return 0;
+   minY=Math.min(
+    minY,
+    p.y
+   );
+
+   maxX=Math.max(
+    maxX,
+    p.x
+   );
+
+   maxY=Math.max(
+    maxY,
+    p.y
+   );
+
+  })
+ );
+
+
+ if(!isFinite(minX))
+  return 0;
+
 
  gx.save();
 
- gx.translate(x-minX*sx,y-minY*sx);
+ gx.translate(
+  x-minX*sx,
+  y-minY*sx
+ );
+
  gx.scale(sx,sx);
+
 
  g.strokes.forEach(s=>{
 
   gx.beginPath();
 
   gx.strokeStyle=color;
-  gx.lineWidth=Math.max(2,(g.width||1200)/170);
+
+  gx.lineWidth=
+   Math.max(
+    2,
+    (g.width||1200)/170
+   );
+
   gx.lineCap="round";
   gx.lineJoin="round";
 
+
   s.forEach((p,i)=>{
 
-   if(i)gx.lineTo(p.x,p.y);
-   else gx.moveTo(p.x,p.y);
+   if(i)
+    gx.lineTo(p.x,p.y);
+   else
+    gx.moveTo(p.x,p.y);
 
   });
 
@@ -944,8 +1504,62 @@ function drawGlyph(g,x,y,size,color){
 
  gx.restore();
 
+
  return(maxX-minX)*sx;
 }
+
+
+/*
+ Get a RANDOM variation.
+
+ This is what makes repeated letters
+ look less identical.
+ */
+
+function randomGlyph(ch){
+
+ let g=
+  fonts[currentFont].glyphs[ch];
+
+ if(!g)
+  return null;
+
+
+ /*
+  New format
+ */
+
+ if(g.variations?.length){
+
+  let usable=
+   g.variations.filter(
+    v=>v?.strokes?.length
+   );
+
+  if(usable.length){
+
+   return usable[
+    Math.floor(
+     Math.random()*usable.length
+    )
+   ];
+  }
+ }
+
+
+ /*
+  Old format fallback
+ */
+
+ if(g.strokes?.length)
+  return g;
+
+
+ return null;
+}
+
+
+/* RENDER */
 
 function render(){
 
@@ -954,39 +1568,76 @@ function render(){
 
  if(!w||!h)return;
 
- gx.clearRect(0,0,w,h);
+ gx.clearRect(
+  0,
+  0,
+  w,
+  h
+ );
 
- gx.fillStyle=$("paperColor").value;
- gx.fillRect(0,0,w,h);
 
- let size=+$("fontSize").value||32;
- let letter=+$("letterSpace").value||0;
- let lineGap=+$("lineSpace").value||0;
+ gx.fillStyle=
+  $("paperColor").value;
+
+ gx.fillRect(
+  0,
+  0,
+  w,
+  h
+ );
+
+
+ let size=
+  +$("fontSize").value||32;
+
+ let letter=
+  +$("letterSpace").value||0;
+
+ let lineGap=
+  +$("lineSpace").value||0;
 
  let text=$("text").value;
- let color=$("textColor").value;
+
+ let color=
+  $("textColor").value;
+
 
  let left=35;
  let top=45;
 
  let maxW=w-70;
- let lineHeight=size+lineGap;
+
+ let lineHeight=
+  size+lineGap;
 
  let y=top;
+
 
  for(let row of text.split("\n")){
 
   let x=left;
 
+
   for(let ch of row){
 
-   let g=fonts[currentFont].glyphs[ch];
+   /*
+    Randomly select a variation
+    every time the text is rendered.
+   */
+
+   let g=randomGlyph(ch);
+
 
    if(g){
 
-    let advance=drawGlyph(
-     g,x,y,size,color
-    );
+    let advance=
+     drawGlyph(
+      g,
+      x,
+      y,
+      size,
+      color
+     );
 
     x+=advance+letter;
 
@@ -994,16 +1645,30 @@ function render(){
 
     gx.save();
 
-    gx.font=`${size}px Arial`;
+    gx.font=
+     `${size}px Arial`;
+
     gx.fillStyle=color;
+
     gx.textBaseline="top";
 
-    gx.fillText(ch,x,y);
+    gx.fillText(
+     ch,
+     x,
+     y
+    );
 
-    x+=gx.measureText(ch).width+letter;
+    x+=
+     gx.measureText(ch).width
+     +letter;
 
     gx.restore();
    }
+
+
+   /*
+    Automatic wrapping
+   */
 
    if(x>maxW){
 
@@ -1012,53 +1677,87 @@ function render(){
    }
   }
 
+
   y+=lineHeight;
  }
 }
 
-/* EXPORT */
+
+/* PNG */
 
 $("pngBtn").onclick=()=>{
 
- let link=document.createElement("a");
+ let link=
+  document.createElement("a");
 
- link.download="handwriting-A4.png";
- link.href=gc.toDataURL("image/png");
+ link.download=
+  "handwriting-A4.png";
+
+ link.href=
+  gc.toDataURL("image/png");
 
  link.click();
 };
 
+
+/* PDF / GOODNOTES */
+
 function printSheet(){
 
- let data=gc.toDataURL("image/png");
+ let data=
+  gc.toDataURL("image/png");
 
- let win=window.open("","_blank");
+ let win=
+  window.open("","_blank");
 
  if(!win)return;
+
 
  win.document.write(`
  <!DOCTYPE html>
  <html>
  <head>
  <title>Handwriting A4</title>
+
  <style>
- @page{size:A4;margin:0}
- html,body{margin:0;padding:0}
+
+ @page{
+  size:A4;
+  margin:0;
+ }
+
+ html,body{
+  margin:0;
+  padding:0;
+ }
+
  img{
   width:210mm;
   height:297mm;
   display:block;
  }
+
  </style>
+
  </head>
+
  <body>
+
  <img src="${data}">
+
  <script>
+
  window.onload=()=>{
-  setTimeout(()=>window.print(),300)
+  setTimeout(
+   ()=>window.print(),
+   300
+  );
  };
+
  <\/script>
+
  </body>
+
  </html>
  `);
 
@@ -1068,20 +1767,32 @@ function printSheet(){
 $("pdfBtn").onclick=printSheet;
 $("goodBtn").onclick=printSheet;
 
+
 /* RESIZE */
 
 window.addEventListener("resize",()=>{
 
- if($("studio").style.display!=="none"){
+ if(
+  $("studio").style.display!=="none"
+ ){
+
   resizeDraw();
+
  }else{
+
   resizeGenerate();
  }
 
  render();
 });
 
+
+/* START */
+
+updateFontList();
+
 loadGlyph();
+
 </script>
 
 </body>
